@@ -1,0 +1,20 @@
+# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm
+## Directory-based project format
+
+#self testfile
+test.c
+test_pro
+
+# c object file 
+*.o
+
+# Additional for IntelliJ
+testsuite/
+
+# For Vim
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+*.un~
+Session.vim
+.netrwhist
+*~
