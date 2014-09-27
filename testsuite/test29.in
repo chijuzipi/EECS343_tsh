@@ -1,8 +1,0 @@
-alias showdir='ls'
-alias foo='ls -lh'
-alias test='whoami'
-alias
-unalias showdir
-unalias foo
-unalias test
-exit

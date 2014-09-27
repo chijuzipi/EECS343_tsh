@@ -1,3 +1,0 @@
-ls -l | wc
-cat test.20 | wc
-exit
