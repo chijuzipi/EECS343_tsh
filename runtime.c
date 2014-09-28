@@ -150,7 +150,8 @@ void RunCmdBg(commandT* cmd)
 {
   //add the bg process to list
   int currentCount;
-  if (&bgjobs == NULL){
+  //printf(
+  if (bgjobs == NULL){
     bgjobs = malloc(sizeof(bgjobL));
     bgjobs->next = NULL;
     currentCount = 1;
@@ -174,7 +175,7 @@ void RunCmdBg(commandT* cmd)
   else {
     conductor->pid = child_pid;
     conductor->next = NULL;
-    printf("[%d]",currentCount);
+    printf("[%d] ",currentCount);
     printf("%d\n",child_pid);
   }
 }
