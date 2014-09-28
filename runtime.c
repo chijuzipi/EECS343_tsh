@@ -75,6 +75,18 @@ typedef struct bgjob_l {
 bgjobL *bgjobs = NULL;
 bgjobL *conductor = NULL;
 
+/************initialized builtin commands*********************************/
+const char *builtins[] = {":", ".", "break", "cd", "continue", "eval", "exec", "exit", "export", "getopts", "hash",
+"pwd", "readonly", "return", "shift", "test", "times", "trap", "umask", "unset"};
+
+const int builtinNumber = 20;
+/*
+a[0] = ":";
+a[1] = ".";
+a[2] = "break";
+a[3] = "cd";
+a[4] = "continue";
+*/
 /************Function Prototypes******************************************/
 /* run command */
 static void RunCmdFork(commandT*, bool);
@@ -126,7 +138,7 @@ static void RunExternalCmd(commandT* cmd, bool fork)
 {
   //the resolve external command add the command path to the cmd->name attribute
   if (ResolveExternalCmd(cmd)){
-    printf("command resolved\n");
+    //printf("command resolved\n");
     if (cmd->bg)
       RunCmdBg(cmd);
     else
@@ -243,52 +255,87 @@ static bool ResolveExternalCmd(commandT* cmd)
   return FALSE; /*The command is not found or the user don't have enough priority to run.*/
 }
 
-static void Exec(commandT* cmd, bool forceFork)
-{  
-  //pid_t should be decleared in the "sys/tpyes.h"
-  int child_status;
-  //process divided into two, one is praent process with child_pid equal child's process id
-  // one is child process with child_pid equals to 0
-  pid_t child_pid = fork();
-
-  /* This is run by the child. execute the command */
-  if(child_pid == 0) {
-    /* This is done by the child process. */
-    //Usage : int execv(const char *path, char *const argv[]); 
-    execv(cmd->name, cmd->argv);
-    /* If execv returns, it must have failed. */
-    printf("execv error, terminated\n");
-    exit(0);
-  }
-
-  /* This is run by the parent. */
-  else {
-    //if it is a bg command, print "\n"
-    if (cmd->bg == 1){
-      printf("%d\n",child_pid);
-    }
-    //else, wait the child prcess to finish
-    else{
-      pid_t tpid;
-      do {
-        //wait 
-        tpid = wait(&child_status);
-        if(tpid != child_pid) kill(tpid, SIGINT);
-      } while(tpid != child_pid);
-    }
-    //return child_status;
-  }
-}
-
 static bool IsBuiltIn(char* cmd)
 {
+  for (int i = 0; i < builtinNumber; i ++){
+    if (strcmp(cmd, builtins[i]) == 0){
+      //printf("this is a builtin command\n");
+      return TRUE;     
+    }
+  }
   return FALSE;     
 }
 
 
 static void RunBuiltInCmd(commandT* cmd)
 {
+  if (ResolveExternalCmd(cmd)){
+      printf("built in command resolved\n");
+      Exec(cmd, FALSE);
+  }
+  else {
+    printf("%s: command not found\n", cmd->argv[0]);
+    fflush(stdout);
+    ReleaseCmdT(&cmd);
+  }
+  //char *newenviron[] = { NULL};
+  //char *parameter[] = 
+  //execl("sh", "sh", "-c", cmd->argv[0], cmd->argv[1]);
+  //perror("execl");
+  /*
+  execl(cmd->argv[0], cmd->argv[1], newenviron);
+  perror("execve");   
+  exit(EXIT_FAILURE);
+  */
+
 }
+
+static void Exec(commandT* cmd, bool forceFork)
+{  
+  //pid_t should be decleared in the "sys/tpyes.h"
+  int child_status;
+  //process divided into two, one is praent process with child_pid equal child's process id
+  // one is child process with child_pid equals to 0
+  if(forceFork){
+    printf("external command executing...\n");
+    pid_t child_pid = fork();
+
+    /* This is run by the child. execute the command */
+    if(child_pid == 0) {
+      /* This is done by the child process. */
+      //Usage : int execv(const char *path, char *const argv[]); 
+      execv(cmd->name, cmd->argv);
+      /* If execv returns, it must have failed. */
+      printf("execv error, terminated\n");
+      exit(0);
+    }
+
+    /* This is run by the parent. */
+    else {
+      //if it is a bg command, print "\n"
+      if (cmd->bg == 1){
+        printf("%d\n",child_pid);
+      }
+      //else, wait the child prcess to finish
+      else{
+        pid_t tpid;
+        do {
+          //wait 
+          tpid = wait(&child_status);
+          if(tpid != child_pid) kill(tpid, SIGINT);
+        } while(tpid != child_pid);
+      }
+      //return child_status;
+    }
+  }
+  else{
+    printf("builtin command executing..\n");
+    execv(cmd->name, cmd->argv);
+    printf("execv error, terminated\n");
+    exit(0);
+  }
+}
+
 
 void CheckJobs()
 {

@@ -8,9 +8,6 @@ test_pro
 # c object file 
 *.o
 
-# Additional for IntelliJ
-testsuite/
-
 # For Vim
 [._]*.s[a-w][a-z]
 [._]s[a-w][a-z]
