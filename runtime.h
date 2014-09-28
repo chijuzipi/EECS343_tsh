@@ -55,13 +55,13 @@
 
 typedef struct command_t
 {
-  char* name;
-  char *cmdline;
-  char *redirect_in, *redirect_out;
+  char* name; //always null
+  char *cmdline; //the whole command line input
+  char *redirect_in, *redirect_out; 
   int is_redirect_in, is_redirect_out;
-  int bg;
-  int argc;
-  char* argv[];
+  int bg; //use "&" at the end to make it 1
+  int argc; //the number of command section, "ls -l -a" === 3
+  char* argv[]; // each command section
 } commandT;
 
 /************Global Variables*********************************************/

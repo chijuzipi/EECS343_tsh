@@ -69,6 +69,7 @@ char* single_param(char *st)
 }
 
 /*Parse the single command and call single_param to parse each word in the command*/
+//parser_single(&(cmdLine[i-j]), j, &(command[task]),bg);
 void parser_single(char *c, int sz, commandT** cd, int bg)
 {
   int i, task_argc = 0, quot1 = 0, quot2 = 0;
@@ -98,7 +99,7 @@ void parser_single(char *c, int sz, commandT** cd, int bg)
     if(c[i] == '<' && quot1 != 1 && quot2 != 1){
       if(cmd_length == sz) cmd_length = i; 
       while(i < (sz - 1) && c[i + 1] == ' ') i++;
-      in = &(c[i+1]);
+     in = &(c[i+1]);
     }
     if(c[i] == '>' && quot1 != 1 && quot2 != 1){
       if(cmd_length == sz) cmd_length = i;
@@ -197,7 +198,16 @@ void Interpret(char* cmdLine)
     }
   }
   parser_single(&(cmdLine[i-j]), j, &(command[task]),bg);
-
+  
+  /* test what is in the command struct
+  printf("the name is : %s \n", command[task]->name);
+  printf("the cmdline is : %s \n", command[task]->cmdline);
+  printf("the argc is : %d \n", command[task]->argc);
+  printf("the bg is : %d \n", command[task]->bg);
+  printf("the argv1 is : %s \n", command[task]->argv[0]);
+  printf("the argv2 is : %s \n", command[task]->argv[1]);
+  printf("the argv3 is : %s \n", command[task]->argv[2]);
+  */
   RunCmd(command, task+1);
   free(command);
 }

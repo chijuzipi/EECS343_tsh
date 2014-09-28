@@ -93,6 +93,7 @@ void RunCmd(commandT** cmd, int n)
 {
   int i;
   total_task = n;
+  //if n==1, means no pipe, definitely fork
   if(n == 1)
     RunCmdFork(cmd[0], TRUE);
   else{
@@ -108,6 +109,7 @@ void RunCmdFork(commandT* cmd, bool fork)
     return;
   if (IsBuiltIn(cmd->argv[0]))
   {
+    //FIXME what is built in command?
     RunBuiltInCmd(cmd);
   }
   else
@@ -137,6 +139,7 @@ void RunCmdRedirIn(commandT* cmd, char* file)
 /*Try to run an external command*/
 static void RunExternalCmd(commandT* cmd, bool fork)
 {
+  //the resolve external command add the command path to the cmd->name attribute
   if (ResolveExternalCmd(cmd)){
     Exec(cmd, fork);
   }
@@ -166,6 +169,7 @@ static bool ResolveExternalCmd(commandT* cmd)
     return FALSE;
   }
   pathlist = getenv("PATH");
+  //printf("pathlist is : %s \n", pathlist);
   if(pathlist == NULL) return FALSE;
   i = 0;
   while(i<strlen(pathlist)){
@@ -181,11 +185,14 @@ static bool ResolveExternalCmd(commandT* cmd)
     }
     buf[j] = '\0';
     strcat(buf, "/");
+    //strcat is to add latter string to the previous
     strcat(buf,cmd->argv[0]);
+    //stat is a system call that is used to determine information about a file based on its file path.
     if(stat(buf, &fs) >= 0){
       if(S_ISDIR(fs.st_mode) == 0)
         if(access(buf,X_OK) == 0){/*Whether it's an executable or the user has required permisson to run it*/
           cmd->name = strdup(buf); 
+          //printf("the cmd's name is now : %s \n", cmd->name);
           return TRUE;
         }
     }
@@ -194,7 +201,27 @@ static bool ResolveExternalCmd(commandT* cmd)
 }
 
 static void Exec(commandT* cmd, bool forceFork)
-{
+{  
+  //pid_t should be decleared in the "sys/tpyes.h"
+  int child_status;
+  pid_t child_pid = fork();
+  if(child_pid == 0) {
+    /* This is done by the child process. */
+    //Usage : int execv(const char *path, char *const argv[]); 
+    execv(cmd->name, cmd->argv);
+    /* If execv returns, it must have failed. */
+    printf("execv error, terminated\n");
+    exit(0);
+  }
+  else {
+    pid_t tpid;
+  /* This is run by the parent.  Wait for the child to terminate. */
+    do {
+      tpid = wait(&child_status);
+      if(tpid != child_pid) process_terminated(tpid);
+    } while(tpid != child_pid);
+    //return child_status;
+  }
 }
 
 static bool IsBuiltIn(char* cmd)
