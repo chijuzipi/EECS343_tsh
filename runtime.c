@@ -64,13 +64,16 @@
 
 #define NBUILTINCOMMANDS (sizeof BuiltInCommands / sizeof(char*))
 
+//a linked list struct
 typedef struct bgjob_l {
   pid_t pid;
   struct bgjob_l* next;
+  int count;
 } bgjobL;
 
 /* the pids of the background processes */
 bgjobL *bgjobs = NULL;
+bgjobL *conductor = NULL;
 
 /************Function Prototypes******************************************/
 /* run command */
@@ -118,9 +121,62 @@ void RunCmdFork(commandT* cmd, bool fork)
   }
 }
 
+/*Try to run an external command*/
+static void RunExternalCmd(commandT* cmd, bool fork)
+{
+  //the resolve external command add the command path to the cmd->name attribute
+  if (ResolveExternalCmd(cmd)){
+    printf("command resolved\n");
+    if (cmd->bg)
+      RunCmdBg(cmd);
+    else
+      Exec(cmd, fork);
+  }
+  else {
+    printf("%s: command not found\n", cmd->argv[0]);
+    fflush(stdout);
+    ReleaseCmdT(&cmd);
+  }
+}
+
+/*
+bgjobL *bgjobs = NULL;
+typedef struct bgjob_l {
+  pid_t pid;
+  struct bgjob_l* next;
+} bgjobL;
+*/
 void RunCmdBg(commandT* cmd)
 {
-  // TODO
+  //add the bg process to list
+  int currentCount;
+  if (&bgjobs == NULL){
+    bgjobs = malloc(sizeof(bgjobL));
+    bgjobs->next = NULL;
+    currentCount = 1;
+    bgjobs->count = currentCount;
+    conductor = bgjobs;
+  }
+  else {
+    conductor->next = malloc(sizeof(bgjobL));
+    currentCount = conductor->count;
+    conductor = conductor->next; 
+    conductor->count = ++currentCount;
+  }
+
+  //int child_status;
+  pid_t child_pid = fork();
+  if(child_pid == 0) {
+    execv(cmd->name, cmd->argv);
+    printf("execv error, terminated\n");
+    exit(0);
+  }
+  else {
+    conductor->pid = child_pid;
+    conductor->next = NULL;
+    printf("[%d]",currentCount);
+    printf("%d\n",child_pid);
+  }
 }
 
 void RunCmdPipe(commandT* cmd1, commandT* cmd2)
@@ -135,20 +191,6 @@ void RunCmdRedirIn(commandT* cmd, char* file)
 {
 }
 
-
-/*Try to run an external command*/
-static void RunExternalCmd(commandT* cmd, bool fork)
-{
-  //the resolve external command add the command path to the cmd->name attribute
-  if (ResolveExternalCmd(cmd)){
-    Exec(cmd, fork);
-  }
-  else {
-    printf("%s: command not found\n", cmd->argv[0]);
-    fflush(stdout);
-    ReleaseCmdT(&cmd);
-  }
-}
 
 /*Find the executable based on search list provided by environment variable PATH*/
 static bool ResolveExternalCmd(commandT* cmd)
@@ -204,7 +246,11 @@ static void Exec(commandT* cmd, bool forceFork)
 {  
   //pid_t should be decleared in the "sys/tpyes.h"
   int child_status;
+  //process divided into two, one is praent process with child_pid equal child's process id
+  // one is child process with child_pid equals to 0
   pid_t child_pid = fork();
+
+  /* This is run by the child. execute the command */
   if(child_pid == 0) {
     /* This is done by the child process. */
     //Usage : int execv(const char *path, char *const argv[]); 
@@ -213,13 +259,22 @@ static void Exec(commandT* cmd, bool forceFork)
     printf("execv error, terminated\n");
     exit(0);
   }
+
+  /* This is run by the parent. */
   else {
-    pid_t tpid;
-  /* This is run by the parent.  Wait for the child to terminate. */
-    do {
-      tpid = wait(&child_status);
-      if(tpid != child_pid) process_terminated(tpid);
-    } while(tpid != child_pid);
+    //if it is a bg command, print "\n"
+    if (cmd->bg == 1){
+      printf("%d\n",child_pid);
+    }
+    //else, wait the child prcess to finish
+    else{
+      pid_t tpid;
+      do {
+        //wait 
+        tpid = wait(&child_status);
+        if(tpid != child_pid) kill(tpid, SIGINT);
+      } while(tpid != child_pid);
+    }
     //return child_status;
   }
 }

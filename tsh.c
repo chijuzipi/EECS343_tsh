@@ -72,11 +72,12 @@ int main (int argc, char *argv[])
 
   while (!forceExit) /* repeat forever */
   {
-
+    //print the prompt
     printf("$$$$:");
     /* read command line */
     getCommandLine(&cmdLine, BUFSIZE);
 
+    //handle ctrl-d to terminate the shell
     if(feof(stdin))
     {
       //printf("\n");
