@@ -11,7 +11,6 @@
 
 int main(int argc, char **argv) 
 {
-    printf("./myspin executing\n");
     int i, secs;
 
     if (argc != 2) {

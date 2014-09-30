@@ -76,17 +76,12 @@ bgjobL *bgjobs = NULL;
 bgjobL *conductor = NULL;
 
 /************initialized builtin commands*********************************/
-const char *builtins[] = {":", ".", "break", "cd", "continue", "eval", "exec", "exit", "export", "getopts", "hash",
-"pwd", "readonly", "return", "shift", "test", "times", "trap", "umask", "unset"};
+//const char *builtins[] = {":", ".", "break", "cd", "continue", "eval", "exec", "exit", "export", "getopts", "hash",
+//"pwd", "readonly", "return", "shift", "test", "times", "trap", "umask", "unset"};
 
-const int builtinNumber = 20;
-/*
-a[0] = ":";
-a[1] = ".";
-a[2] = "break";
-a[3] = "cd";
-a[4] = "continue";
-*/
+const char *builtins[] = {"jobs"};
+const int builtinNumber = 1; 
+
 /************Function Prototypes******************************************/
 /* run command */
 static void RunCmdFork(commandT*, bool);
@@ -102,8 +97,9 @@ static void RunBuiltInCmd(commandT*);
 static bool IsBuiltIn(char*);
 /************External Declaration*****************************************/
 
-/**************Implementation***********************************************/
+/**************Implementation*********************************************/
 int total_task;
+
 void RunCmd(commandT** cmd, int n)
 {
   int i;
@@ -120,17 +116,42 @@ void RunCmd(commandT** cmd, int n)
 
 void RunCmdFork(commandT* cmd, bool fork)
 {
+
   if (cmd->argc<=0)
     return;
   if (IsBuiltIn(cmd->argv[0]))
   {
-    //FIXME what is built in command?
     RunBuiltInCmd(cmd);
   }
   else
   {
+    //printf("run external command\n");
     RunExternalCmd(cmd, fork);
   }
+}
+
+static void RunBuiltInCmd(commandT* cmd)
+{ 
+/*
+    if (strcmp(cmd->name, "jobs") == 0) {
+        do_free = TRUE;
+        bgjobL* prev_job = NULL;
+        bgjobL* top_job = oldest_bgjob;
+        while(top_job != NULL)
+        {
+            prev_job = top_job;
+            top_job = top_job->prev;
+            print_job(prev_job, job_status(prev_job));
+        }
+    }
+    else if (strcmp(cmd->name, "fg") == 0){
+        fg(cmd);
+    }
+    else if (strcmp(cmd->name, "bg") == 0){
+        bg(cmd);
+    }
+	  free(path);
+    */
 }
 
 /*Try to run an external command*/
@@ -139,10 +160,7 @@ static void RunExternalCmd(commandT* cmd, bool fork)
   //the resolve external command add the command path to the cmd->name attribute
   if (ResolveExternalCmd(cmd)){
     //printf("command resolved\n");
-    if (cmd->bg)
-      RunCmdBg(cmd);
-    else
-      Exec(cmd, fork);
+    Exec(cmd, fork);
   }
   else {
     printf("%s: command not found\n", cmd->argv[0]);
@@ -151,18 +169,11 @@ static void RunExternalCmd(commandT* cmd, bool fork)
   }
 }
 
-/*
-bgjobL *bgjobs = NULL;
-typedef struct bgjob_l {
-  pid_t pid;
-  struct bgjob_l* next;
-} bgjobL;
-*/
 void RunCmdBg(commandT* cmd)
 {
   //add the bg process to list
+  /*
   int currentCount;
-  //printf(
   if (bgjobs == NULL){
     bgjobs = malloc(sizeof(bgjobL));
     bgjobs->next = NULL;
@@ -180,16 +191,18 @@ void RunCmdBg(commandT* cmd)
   //int child_status;
   pid_t child_pid = fork();
   if(child_pid == 0) {
-    execv(cmd->name, cmd->argv);
+    execve(cmd->name, cmd->argv, NULL);
     printf("execv error, terminated\n");
     exit(0);
   }
   else {
     conductor->pid = child_pid;
     conductor->next = NULL;
-    printf("[%d] ",currentCount);
-    printf("%d\n",child_pid);
+    handleJobs(child_pid);
+    //printf("[%d] ",currentCount);
+    //printf("%d\n",child_pid);
   }
+  */
 }
 
 void RunCmdPipe(commandT* cmd1, commandT* cmd2)
@@ -203,7 +216,6 @@ void RunCmdRedirOut(commandT* cmd, char* file)
 void RunCmdRedirIn(commandT* cmd, char* file)
 {
 }
-
 
 /*Find the executable based on search list provided by environment variable PATH*/
 static bool ResolveExternalCmd(commandT* cmd)
@@ -266,45 +278,19 @@ static bool IsBuiltIn(char* cmd)
   return FALSE;     
 }
 
-
-static void RunBuiltInCmd(commandT* cmd)
-{
-  if (ResolveExternalCmd(cmd)){
-      printf("built in command resolved\n");
-      Exec(cmd, FALSE);
-  }
-  else {
-    printf("%s: command not found\n", cmd->argv[0]);
-    fflush(stdout);
-    ReleaseCmdT(&cmd);
-  }
-  //char *newenviron[] = { NULL};
-  //char *parameter[] = 
-  //execl("sh", "sh", "-c", cmd->argv[0], cmd->argv[1]);
-  //perror("execl");
-  /*
-  execl(cmd->argv[0], cmd->argv[1], newenviron);
-  perror("execve");   
-  exit(EXIT_FAILURE);
-  */
-
-}
-
 static void Exec(commandT* cmd, bool forceFork)
 {  
-  //pid_t should be decleared in the "sys/tpyes.h"
-  int child_status;
   //process divided into two, one is praent process with child_pid equal child's process id
   // one is child process with child_pid equals to 0
   if(forceFork){
-    printf("external command executing...\n");
+    //printf("external command executing...\n");
     pid_t child_pid = fork();
 
     /* This is run by the child. execute the command */
     if(child_pid == 0) {
       /* This is done by the child process. */
       //Usage : int execv(const char *path, char *const argv[]); 
-      execv(cmd->name, cmd->argv);
+      execve(cmd->name, cmd->argv, NULL);
       /* If execv returns, it must have failed. */
       printf("execv error, terminated\n");
       exit(0);
@@ -312,31 +298,34 @@ static void Exec(commandT* cmd, bool forceFork)
 
     /* This is run by the parent. */
     else {
-      //if it is a bg command, print "\n"
-      if (cmd->bg == 1){
-        printf("%d\n",child_pid);
+      HandleJobs(child_pid);
+      if(cmd->bg){
+      // wait the child prcess to finish
+        //printf("job updates");
+        wait(NULL);
       }
-      //else, wait the child prcess to finish
-      else{
-        pid_t tpid;
-        do {
-          //wait 
-          tpid = wait(&child_status);
-          if(tpid != child_pid) kill(tpid, SIGINT);
-        } while(tpid != child_pid);
-      }
-      //return child_status;
+      else 
+        printf("\n");
     }
   }
   else{
-    printf("builtin command executing..\n");
+    //printf("builtin command executing..\n");
     execv(cmd->name, cmd->argv);
     printf("execv error, terminated\n");
     exit(0);
   }
 }
 
-
+void HandleJobs(pid_t pid){
+  /* 
+  1) create list node
+  2) check existing jobs status
+  3) printng updates
+  4) update linked list
+  5) print prompt
+  */
+}
+  
 void CheckJobs()
 {
 }

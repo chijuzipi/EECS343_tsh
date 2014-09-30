@@ -73,7 +73,7 @@ int main (int argc, char *argv[])
   while (!forceExit) /* repeat forever */
   {
     //print the prompt
-    printf("$$$$:");
+    printf("");
     /* read command line */
     getCommandLine(&cmdLine, BUFSIZE);
 
