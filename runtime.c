@@ -298,7 +298,7 @@ static void Exec(commandT* cmd, bool forceFork)
 
     /* This is run by the parent. */
     else {
-      HandleJobs(child_pid);
+      //HandleJobs(child_pid);
       if(cmd->bg){
       // wait the child prcess to finish
         //printf("job updates");
@@ -316,7 +316,7 @@ static void Exec(commandT* cmd, bool forceFork)
   }
 }
 
-void HandleJobs(pid_t pid){
+//void HandleJobs(pid_t pid){
   /* 
   1) create list node
   2) check existing jobs status
@@ -324,7 +324,7 @@ void HandleJobs(pid_t pid){
   4) update linked list
   5) print prompt
   */
-}
+//}
   
 void CheckJobs()
 {
