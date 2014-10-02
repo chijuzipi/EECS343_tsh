@@ -66,14 +66,18 @@
 
 //a linked list struct
 typedef struct bgjob_l {
-  pid_t pid;
+  pid_t pid; 
+  int jobC; //job count
   struct bgjob_l* next;
-  int count;
+  state_t state; //what the status of the job
+  int bg; // if the job is bg
+  char *cmd; //the job cmd
 } bgjobL;
 
 /* the pids of the background processes */
-bgjobL *bgjobs = NULL;
-bgjobL *conductor = NULL;
+bgjobL *headbgjobs = NULL;
+bgjobL *currbgjobs = NULL;
+//bgjobL *current = NULL;
 
 /************initialized builtin commands*********************************/
 //const char *builtins[] = {":", ".", "break", "cd", "continue", "eval", "exec", "exit", "export", "getopts", "hash",
@@ -95,6 +99,15 @@ static void Exec(commandT*, bool);
 static void RunBuiltInCmd(commandT*);
 /* checks whether a command is a builtin command */
 static bool IsBuiltIn(char*);
+
+//add a new job to linked list
+static bgjobL *addJobList(pid_t pid, char *cmd, bool isbg);
+
+//list the jobs in the termial
+static void showjobs();
+
+//update the status of jobs in the linked list
+void updatebgjob(pid_t pid, state_t newstate);
 /************External Declaration*****************************************/
 
 /**************Implementation*********************************************/
@@ -104,7 +117,7 @@ void RunCmd(commandT** cmd, int n)
 {
   int i;
   total_task = n;
-  //if n==1, means no pipe, definitely fork
+
   if(n == 1)
     RunCmdFork(cmd[0], TRUE);
   else{
@@ -134,17 +147,8 @@ void RunCmdFork(commandT* cmd, bool fork)
 static void RunBuiltInCmd(commandT* cmd)
 { 
     if (strcmp(cmd->argv[0], "jobs") == 0) {
-      printf("jobs");
-    /*
-        bgjobL* prev_job = NULL;
-        bgjobL* top_job = oldest_bgjob;
-        while(top_job != NULL)
-        {
-            prev_job = top_job;
-            top_job = top_job->prev;
-            print_job(prev_job, job_status(prev_job));
-        }
-        */
+      //printf("jobs");
+      showjobs();
     }
     else if (strcmp(cmd->argv[0], "cd") == 0) {
       if (cmd->argc > 1)
@@ -179,38 +183,6 @@ static void RunExternalCmd(commandT* cmd, bool fork)
 
 void RunCmdBg(commandT* cmd)
 {
-  //add the bg process to list
-  /*
-  int currentCount;
-  if (bgjobs == NULL){
-    bgjobs = malloc(sizeof(bgjobL));
-    bgjobs->next = NULL;
-    currentCount = 1;
-    bgjobs->count = currentCount;
-    conductor = bgjobs;
-  }
-  else {
-    conductor->next = malloc(sizeof(bgjobL));
-    currentCount = conductor->count;
-    conductor = conductor->next; 
-    conductor->count = ++currentCount;
-  }
-
-  //int child_status;
-  pid_t child_pid = fork();
-  if(child_pid == 0) {
-    execve(cmd->name, cmd->argv, NULL);
-    printf("execv error, terminated\n");
-    exit(0);
-  }
-  else {
-    conductor->pid = child_pid;
-    conductor->next = NULL;
-    handleJobs(child_pid);
-    //printf("[%d] ",currentCount);
-    //printf("%d\n",child_pid);
-  }
-  */
 }
 
 void RunCmdPipe(commandT* cmd1, commandT* cmd2)
@@ -291,17 +263,25 @@ static void Exec(commandT* cmd, bool forceFork)
 {  
   //process divided into two, one is praent process with child_pid equal child's process id
   // one is child process with child_pid equals to 0
-  int status;
-  if(forceFork){
+  pid_t pid;
+  sigset_t mask;
+  sigemptyset(&mask);
+  sigaddset(&mask, SIGCHLD);
+
+  // block sigchld signals until recording the new process id,
+  // and then fork the foreground process
+  sigprocmask(SIG_BLOCK, &mask, NULL);
     //printf("external command executing...\n");
-    pid_t child_pid = fork();
+    pid = fork();
 
     /* This is run by the child. execute the command */
-    if(child_pid == 0) {
-      /* This is done by the child process. */
+    if(pid == 0) {
+      //to group the processs 
+      setpgid(0,0);
       //Usage : int execv(const char *path, char *const argv[]); 
-      execve(cmd->name, cmd->argv, NULL);
-      /* If execv returns, it must have failed. */
+      execv(cmd->name, cmd->argv);
+
+      // If execv returns, it must have failed.
       printf("execv error, terminated\n");
       exit(2);
     }
@@ -310,25 +290,54 @@ static void Exec(commandT* cmd, bool forceFork)
     else {
       //HandleJobs(child_pid);
       if(cmd->bg){
-        printf("$$$$:");
+        //printf("$$$$:");
+        addJobList(pid, cmd->argv[0], TRUE);
+        sigprocmask(SIG_UNBLOCK, &mask, NULL);
       }
-      else 
-        waitpid(child_pid, &status, 0);
+      else {
+        fgpid = pid;
+        addJobList(pid, cmd->argv[0], FALSE);
+        sigprocmask(SIG_UNBLOCK, &mask, NULL);
+        wait(NULL);
         //printf("\n");
     }
   }
-  else{
-    /*
-    execv(cmd->name, cmd->argv);
-    printf("execv error, terminated\n");
-    exit(0);
-    */
+}
+
+bgjobL * addJobList(pid_t pid, char *cmd, bool isbg){
+  printf("adding job\n");
+  bgjobL *lastbgjob = currbgjobs;
+  bgjobL *newjob = (bgjobL *)malloc(sizeof(bgjobL));
+  newjob->next = NULL;
+  //int maxjobid = 0;
+  // add the job to the beginning of the list
+  // (bg jobs is in descending order of age)
+  int count = 0;
+  if (lastbgjob == NULL) {
+    headbgjobs = newjob;
   }
+  else{
+    count = lastbgjob->jobC;
+    lastbgjob->next = newjob;
+  }
+  currbgjobs = newjob;
+  // record everying in newjob and return it
+  newjob->pid = pid;
+  newjob->state = RUNNING; //assume the job is still running
+  newjob->jobC = count + 1;
+  newjob->cmd = (char *)malloc(sizeof(char) * (MAXLINE));
+  strcpy(newjob->cmd, cmd);
+  //int cmdlinelen = strlen(newjob->cmdline);
+  // drop the " &" if it's a bg jobx
+  if (isbg)
+    newjob->bg = TRUE;
+  printf("the new job cmd is %s\n", newjob->cmd);
+  return newjob;
 }
 
 //void HandleJobs(pid_t pid){
   /* 
-  1) create list node
+  1) add bg jobs  
   2) check existing jobs status
   3) printng updates
   4) update linked list
@@ -340,6 +349,68 @@ void CheckJobs()
 {
 }
 
+static void showjobs()
+{
+  printf("the head job address is %p\n", headbgjobs);
+  bgjobL *job = headbgjobs;
+  //printf("the headbgjobs is %p\n", (void *)job);
+  while (job != NULL) {
+
+   //if (job->state != DONE && !job->bg) {
+      state_t state = job->state;
+      const char* msg =
+	(state == DONE ? "Done" :
+	 (state == RUNNING ? "Running" :
+	  (state == STOPPED ? "Stopped" : "slfaksjd!")));
+      printf("[%d]   %-24s%s%s\n", 
+	     job->jobC, 
+	     msg, 
+	     job->cmd,
+	     (job->state == RUNNING ? " &" : ""));
+    //}
+    job = job->next;
+    printf("%s\n", msg);
+  }
+  fflush(stdout);
+}
+
+//update the job state in list
+void updatebgjob(pid_t pid, state_t newstate){
+  bgjobL *current;
+  current = headbgjobs;
+  while (current != NULL) {
+    if (current->pid == pid) {
+	      current->state = newstate;
+    }
+        current = current->next;
+  }
+}
+
+//send signal to fg jobs
+void IntFg()
+{
+  if (fgpid != -1) 
+    kill(-fgpid, SIGINT);
+}
+
+void StopFg()
+{
+  if (fgpid == -1)
+    return;
+  bgjobL *job = currbgjobs;
+  while (job != NULL) {
+    if (job->pid == fgpid)
+      break;
+    job = job->next;
+  }
+  job->state = STOPPED;
+  kill(-fgpid, SIGTSTP);
+  fgpid = -1; 
+  printf("[%d]   %-24s%s\n", job->jobC, "Stopped", job->cmd);
+}
+
+/*************************singal handle**********
+************************************************/
 
 commandT* CreateCmdT(int n)
 {
@@ -366,3 +437,4 @@ void ReleaseCmdT(commandT **cmd){
     if((*cmd)->argv[i] != NULL) free((*cmd)->argv[i]);
   free(*cmd);
 }
+

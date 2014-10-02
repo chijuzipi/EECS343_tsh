@@ -57,6 +57,9 @@
 /* handles SIGINT and SIGSTOP signals */	
 static void sig(int);
 
+/* listen to signal and udpate job list */	
+static void updateChild();
+
 /************External Declaration*****************************************/
 
 /**************Implementation***********************************************/
@@ -69,6 +72,8 @@ int main (int argc, char *argv[])
   /* shell initialization */
   if (signal(SIGINT, sig) == SIG_ERR) PrintPError("SIGINT");
   if (signal(SIGTSTP, sig) == SIG_ERR) PrintPError("SIGTSTP");
+  if (signal(SIGCHLD, sig) == SIG_ERR) PrintPError("SIGCHLD");
+  fgpid = -1;
 
   while (!forceExit) /* repeat forever */
   {
@@ -96,7 +101,6 @@ int main (int argc, char *argv[])
     /* interpret command and line
      * includes executing of commands */
     Interpret(cmdLine);
-
   }
 
   /* shell termination */
@@ -106,5 +110,29 @@ int main (int argc, char *argv[])
 
 static void sig(int signo)
 {
+  if (signo == SIGINT) 
+    IntFg();
+  if (signo == SIGTSTP)
+    StopFg();
+  if (signo == SIGCHLD)
+    updateChild();
 }
+
+static void updateChild()
+{
+  int status = 0;
+  int pid = 0;
+  do 
+    {
+      pid = waitpid(-1, &status, WNOHANG | WUNTRACED);
+      // if fg process has stopped, update fgpid
+      if (pid == fgpid)
+        fgpid = -1;
+      if (WIFSTOPPED(status)) {
+        updatebgjob(pid, STOPPED);
+      }
+      else
+        updatebgjob(pid, DONE);
+    } while (pid > 0);
+} 
 

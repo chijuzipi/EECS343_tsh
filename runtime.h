@@ -53,6 +53,10 @@
 #define VAREXTERN(x, y) extern x;
 #endif
 
+pid_t fgpid;
+
+typedef enum { RUNNING, DONE, FG, FGDONE, STOPPED } state_t;
+
 typedef struct command_t
 {
   char* name; //always null

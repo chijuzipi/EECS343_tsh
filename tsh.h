@@ -48,6 +48,9 @@
 
 /************Function Prototypes******************************************/
 
+EXTERN void IntFg();
+EXTERN void StopFg();
+EXTERN void updatebgjob();
 /************External Declaration*****************************************/
 
 /**************Definition***************************************************/

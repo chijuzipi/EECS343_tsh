@@ -207,8 +207,8 @@ void Interpret(char* cmdLine)
   printf("the argv1 is : %s \n", command[task]->argv[0]);
   printf("the argv2 is : %s \n", command[task]->argv[1]);
   printf("the argv3 is : %s \n", command[task]->argv[2]);
+  printf("the bg is : %d \n", command[task]->bg);
   */
-  //printf("the command is : %s \n", command[task]->argv[0]);
   RunCmd(command, task+1);
   free(command);
 }
