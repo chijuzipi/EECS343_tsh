@@ -120,7 +120,8 @@ void RunCmdFork(commandT* cmd, bool fork)
   if (cmd->argc<=0)
     return;
   if (IsBuiltIn(cmd->argv[0]))
-  {
+  { 
+    //printf("the cmd name is %s", cmd->argv[0]);
     RunBuiltInCmd(cmd);
   }
   else
@@ -132,7 +133,7 @@ void RunCmdFork(commandT* cmd, bool fork)
 
 static void RunBuiltInCmd(commandT* cmd)
 { 
-    if (strcmp(cmd->name, "jobs") == 0) {
+    if (strcmp(cmd->argv[0], "jobs") == 0) {
       printf("jobs");
     /*
         bgjobL* prev_job = NULL;
@@ -276,7 +277,8 @@ static bool ResolveExternalCmd(commandT* cmd)
 
 static bool IsBuiltIn(char* cmd)
 {
-  for (int i = 0; i < builtinNumber; i ++){
+  int i;
+  for (i = 0; i < builtinNumber; i ++){
     if (strcmp(cmd, builtins[i]) == 0){
       //printf("this is a builtin command\n");
       return TRUE;     
