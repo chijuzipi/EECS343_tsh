@@ -97,7 +97,7 @@ int main (int argc, char *argv[])
       continue;
     }
 
-    /* checks the status of background jobs */
+    /* checks the status of background jobs and printout fininshed bg jobs */
     CheckJobs();
 
     /* interpret command and line
@@ -120,8 +120,7 @@ static void sig(int signo)
     updateChild();
 }
 
-static void updateChild()
-{
+static void updateChild(){
   int status = 0;
   int pid = 0;
   do
