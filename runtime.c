@@ -77,7 +77,6 @@ typedef struct bgjob_l {
 /* the pids of the background processes */
 bgjobL *headbgjob = NULL;
 bgjobL *currbgjob = NULL;
-//bgjobL *current = NULL;
 
 /************initialized builtin commands*********************************/
 //const char *builtins[] = {":", ".", "break", "cd", "continue", "eval", "exec", "exit", "export", "getopts", "hash",
@@ -319,7 +318,9 @@ bgjobL * addJobList(pid_t pid, char *cmd, bool isbg){
   //int cmdlinelen = strlen(newjob->cmdline);
   // drop the " &" if it's a bg jobx
   if (isbg)
-    newjob->bg = TRUE;
+    newjob->bg = 1;
+  else
+    newjob->bg = 0;
   return newjob;
 }
 
@@ -335,29 +336,28 @@ bgjobL * addJobList(pid_t pid, char *cmd, bool isbg){
   
 static void showjobs()
 {
+  //printf("showing jobs\n");
   bgjobL *job = headbgjob;
   while (job != NULL) {
+    printf("head job status %d\n", (int)headbgjob->state);
 
    //if (job->state != DONE && !job->bg) {
       state_t state = job->state;
       const char* msg =
-	(state == DONE ? "Done" :
-	 (state == RUNNING ? "Running" :
-	  (state == STOPPED ? "Stopped" : "slfaksjd!")));
-      printf("[%d]   %-24s%s%s\n", 
-	     job->jobC, 
-	     msg, 
-	     job->cmd,
-	     (job->state == RUNNING ? " &" : ""));
+      (state == DONE ? "Done" :
+      (state == RUNNING ? "Running" :
+      (state == STOPPED ? "Stopped" : "error state")));
+      printf("[%d]   %-24s%s%s\n", job->jobC, msg, job->cmd, (job->state == RUNNING ? " &" : ""));
     //}
     job = job->next;
-    printf("%s\n", msg);
+    //printf("%s\n", msg);
   }
-  fflush(stdout);
+  //fflush(stdout);
 }
 
 //update the job state in list
 void UpdateBgJob(pid_t pid, state_t newstate){
+  //printf("updating bg job....");
   bgjobL *current;
   current = headbgjob;
   while (current != NULL) {
@@ -370,7 +370,7 @@ void UpdateBgJob(pid_t pid, state_t newstate){
 
 void CheckJobs() {
   bgjobL *current;
-  bgjobL *prev;
+  //bgjobL *prev;
   //bgjobL *temp;
   current = headbgjob;
   while (current != NULL) {
