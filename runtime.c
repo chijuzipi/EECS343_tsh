@@ -152,12 +152,12 @@ static void RunBuiltInCmd(commandT* cmd)
       else
         chdir(getenv("HOME"));
     }
-    else if (strcmp(cmd->name, "fg") == 0){
-      printf("fg command");
+    else if (strcmp(cmd->argv[0], "fg") == 0){
+      printf("fg command\n");
         //fg(cmd);
     }
-    else if (strcmp(cmd->name, "bg") == 0){
-      printf("bg command");
+    else if (strcmp(cmd->argv[0], "bg") == 0){
+      printf("bg command\n");
         //bg(cmd);
     }
 }
