@@ -79,8 +79,8 @@ bgjobL *conductor = NULL;
 //const char *builtins[] = {":", ".", "break", "cd", "continue", "eval", "exec", "exit", "export", "getopts", "hash",
 //"pwd", "readonly", "return", "shift", "test", "times", "trap", "umask", "unset"};
 
-const char *builtins[] = {"jobs"};
-const int builtinNumber = 1; 
+const char *builtins[] = {"jobs", "bg", "fg", "cd"};
+const int builtinNumber = 4; 
 
 /************Function Prototypes******************************************/
 /* run command */
@@ -132,9 +132,9 @@ void RunCmdFork(commandT* cmd, bool fork)
 
 static void RunBuiltInCmd(commandT* cmd)
 { 
-/*
     if (strcmp(cmd->name, "jobs") == 0) {
-        do_free = TRUE;
+      printf("jobs");
+    /*
         bgjobL* prev_job = NULL;
         bgjobL* top_job = oldest_bgjob;
         while(top_job != NULL)
@@ -143,15 +143,22 @@ static void RunBuiltInCmd(commandT* cmd)
             top_job = top_job->prev;
             print_job(prev_job, job_status(prev_job));
         }
+        */
+    }
+    else if (strcmp(cmd->argv[0], "cd") == 0) {
+      if (cmd->argc > 1)
+        chdir(cmd->argv[1]);
+      else
+        chdir(getenv("HOME"));
     }
     else if (strcmp(cmd->name, "fg") == 0){
-        fg(cmd);
+      printf("fg command");
+        //fg(cmd);
     }
     else if (strcmp(cmd->name, "bg") == 0){
-        bg(cmd);
+      printf("bg command");
+        //bg(cmd);
     }
-	  free(path);
-    */
 }
 
 /*Try to run an external command*/
@@ -282,6 +289,7 @@ static void Exec(commandT* cmd, bool forceFork)
 {  
   //process divided into two, one is praent process with child_pid equal child's process id
   // one is child process with child_pid equals to 0
+  int status;
   if(forceFork){
     //printf("external command executing...\n");
     pid_t child_pid = fork();
@@ -293,26 +301,26 @@ static void Exec(commandT* cmd, bool forceFork)
       execve(cmd->name, cmd->argv, NULL);
       /* If execv returns, it must have failed. */
       printf("execv error, terminated\n");
-      exit(0);
+      exit(2);
     }
 
     /* This is run by the parent. */
     else {
       //HandleJobs(child_pid);
       if(cmd->bg){
-      // wait the child prcess to finish
-        //printf("job updates");
-        wait(NULL);
+        printf("$$$$:");
       }
       else 
-        printf("\n");
+        waitpid(child_pid, &status, 0);
+        //printf("\n");
     }
   }
   else{
-    //printf("builtin command executing..\n");
+    /*
     execv(cmd->name, cmd->argv);
     printf("execv error, terminated\n");
     exit(0);
+    */
   }
 }
 
