@@ -129,10 +129,10 @@ static void updateChild()
       if (pid == fgpid)
         fgpid = -1;
       if (WIFSTOPPED(status)) {
-        updatebgjob(pid, STOPPED);
+        UpdateBgJob(pid, STOPPED);
       }
       else
-        updatebgjob(pid, DONE);
+        UpdateBgJob(pid, DONE);
     } while (pid > 0);
 } 
 

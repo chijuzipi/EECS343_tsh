@@ -106,8 +106,6 @@ static bgjobL *addJobList(pid_t pid, char *cmd, bool isbg);
 //list the jobs in the termial
 static void showjobs();
 
-//update the status of jobs in the linked list
-void updatebgjob(pid_t pid, state_t newstate);
 /************External Declaration*****************************************/
 
 /**************Implementation*********************************************/
@@ -134,12 +132,10 @@ void RunCmdFork(commandT* cmd, bool fork)
     return;
   if (IsBuiltIn(cmd->argv[0]))
   { 
-    //printf("the cmd name is %s", cmd->argv[0]);
     RunBuiltInCmd(cmd);
   }
   else
   {
-    //printf("run external command\n");
     RunExternalCmd(cmd, fork);
   }
 }
@@ -147,7 +143,6 @@ void RunCmdFork(commandT* cmd, bool fork)
 static void RunBuiltInCmd(commandT* cmd)
 { 
     if (strcmp(cmd->argv[0], "jobs") == 0) {
-      //printf("jobs");
       showjobs();
     }
     else if (strcmp(cmd->argv[0], "cd") == 0) {
@@ -171,7 +166,6 @@ static void RunExternalCmd(commandT* cmd, bool fork)
 {
   //the resolve external command add the command path to the cmd->name attribute
   if (ResolveExternalCmd(cmd)){
-    //printf("command resolved\n");
     Exec(cmd, fork);
   }
   else {
@@ -216,7 +210,6 @@ static bool ResolveExternalCmd(commandT* cmd)
     return FALSE;
   }
   pathlist = getenv("PATH");
-  //printf("pathlist is : %s \n", pathlist);
   if(pathlist == NULL) return FALSE;
   i = 0;
   while(i<strlen(pathlist)){
@@ -239,7 +232,6 @@ static bool ResolveExternalCmd(commandT* cmd)
       if(S_ISDIR(fs.st_mode) == 0)
         if(access(buf,X_OK) == 0){/*Whether it's an executable or the user has required permisson to run it*/
           cmd->name = strdup(buf); 
-          //printf("the cmd's name is now : %s \n", cmd->name);
           return TRUE;
         }
     }
@@ -252,7 +244,6 @@ static bool IsBuiltIn(char* cmd)
   int i;
   for (i = 0; i < builtinNumber; i ++){
     if (strcmp(cmd, builtins[i]) == 0){
-      //printf("this is a builtin command\n");
       return TRUE;     
     }
   }
@@ -271,7 +262,6 @@ static void Exec(commandT* cmd, bool forceFork)
   // block sigchld signals until recording the new process id,
   // and then fork the foreground process
   sigprocmask(SIG_BLOCK, &mask, NULL);
-    //printf("external command executing...\n");
     pid = fork();
 
     /* This is run by the child. execute the command */
@@ -299,13 +289,12 @@ static void Exec(commandT* cmd, bool forceFork)
         addJobList(pid, cmd->argv[0], FALSE);
         sigprocmask(SIG_UNBLOCK, &mask, NULL);
         wait(NULL);
-        //printf("\n");
     }
   }
 }
 
 bgjobL * addJobList(pid_t pid, char *cmd, bool isbg){
-  printf("adding job\n");
+  //printf("adding job\n");
   bgjobL *lastbgjob = currbgjobs;
   bgjobL *newjob = (bgjobL *)malloc(sizeof(bgjobL));
   newjob->next = NULL;
@@ -331,7 +320,7 @@ bgjobL * addJobList(pid_t pid, char *cmd, bool isbg){
   // drop the " &" if it's a bg jobx
   if (isbg)
     newjob->bg = TRUE;
-  printf("the new job cmd is %s\n", newjob->cmd);
+  //printf("the new job cmd is %s\n", newjob->cmd);
   return newjob;
 }
 
@@ -345,13 +334,9 @@ bgjobL * addJobList(pid_t pid, char *cmd, bool isbg){
   */
 //}
   
-void CheckJobs()
-{
-}
-
 static void showjobs()
 {
-  printf("the head job address is %p\n", headbgjobs);
+  //printf("the head job address is %p\n", headbgjobs);
   bgjobL *job = headbgjobs;
   //printf("the headbgjobs is %p\n", (void *)job);
   while (job != NULL) {
@@ -375,7 +360,7 @@ static void showjobs()
 }
 
 //update the job state in list
-void updatebgjob(pid_t pid, state_t newstate){
+void UpdateBgJob(pid_t pid, state_t newstate){
   bgjobL *current;
   current = headbgjobs;
   while (current != NULL) {
@@ -386,6 +371,39 @@ void updatebgjob(pid_t pid, state_t newstate){
   }
 }
 
+void CheckJobs() {
+  bgjobL *current;
+  //bgjobL *prev;
+  //bgjobL *temp;
+  current = headbgjobs;
+  //prev = NULL;
+
+  if (current->state == DONE)
+	printf("[%d]   %-24s%s\n", current->jobC, "Done", current->cmd);
+  /*
+  while (current != NULL) {
+    // delete bg and fg jbos that have finished
+    if (current->state == DONE) {
+      if (current->bg)
+      //print out the finished bg jobs
+	      printf("[%d]   %-24s%s\n", current->jobC, "Done", current->cmd);
+        
+      if (prev == NULL) {
+	      headbgjobs = current->next;
+      } else {
+	      prev->next = current->next;
+      }
+      //free(current->cmd);
+      //free(current);
+        //temp = current->next;
+      // if it was a bg job, report it finished
+    }
+  }
+  */
+} /* CheckJobs */
+
+/*************************singal handle**********
+************************************************/
 //send signal to fg jobs
 void IntFg()
 {
@@ -408,9 +426,8 @@ void StopFg()
   fgpid = -1; 
   printf("[%d]   %-24s%s\n", job->jobC, "Stopped", job->cmd);
 }
+/************************************************/
 
-/*************************singal handle**********
-************************************************/
 
 commandT* CreateCmdT(int n)
 {
