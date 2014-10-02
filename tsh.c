@@ -35,6 +35,8 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 /************Private include**********************************************/
 #include "tsh.h"
@@ -122,7 +124,7 @@ static void updateChild()
 {
   int status = 0;
   int pid = 0;
-  do 
+  do
     {
       pid = waitpid(-1, &status, WNOHANG | WUNTRACED);
       // if fg process has stopped, update fgpid

@@ -376,9 +376,10 @@ void CheckJobs() {
   //bgjobL *prev;
   //bgjobL *temp;
   current = headbgjobs;
+  printf("the headbgjob state is%d\n",(int)headbgjobs->state);
   //prev = NULL;
 
-  if (current->state == DONE)
+  //if (current->state == DONE)
 	printf("[%d]   %-24s%s\n", current->jobC, "Done", current->cmd);
   /*
   while (current != NULL) {
