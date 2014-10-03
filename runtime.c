@@ -70,7 +70,7 @@ typedef struct bgjob_l {
   int jobC; //job count
   struct bgjob_l* next;
   state_t state; //what the status of the job
-  int bg; // if the job is bg
+  bool bg;
   char *cmd; //the job cmd
 } bgjobL;
 
@@ -98,12 +98,16 @@ static void Exec(commandT*, bool);
 static void RunBuiltInCmd(commandT*);
 /* checks whether a command is a builtin command */
 static bool IsBuiltIn(char*);
-
-//add a new job to linked list
-static bgjobL *addJobList(pid_t pid, char *cmd, bool isbg);
-
+/* returns an array with the path environment elements */
+static char** getpath(char*);
+/* frees the above array */
+static void freepath(char**);
+/* add a bg job to the list */
+static bgjobL* addJobList(pid_t, char*, bool);
 //list the jobs in the termial
 static void showjobs();
+/* wait for the fg job to finish */
+static void waitforfg();
 
 /************External Declaration*****************************************/
 
@@ -169,7 +173,7 @@ static void RunExternalCmd(commandT* cmd, bool fork)
   }
   else {
     printf("%s: command not found\n", cmd->argv[0]);
-    fflush(stdout);
+    //fflush(stdout);
     ReleaseCmdT(&cmd);
   }
 }
@@ -253,7 +257,7 @@ static void Exec(commandT* cmd, bool forceFork)
 {  
   //process divided into two, one is praent process with child_pid equal child's process id
   // one is child process with child_pid equals to 0
-  pid_t pid;
+  int pid;
   sigset_t mask;
   sigemptyset(&mask);
   sigaddset(&mask, SIGCHLD);
@@ -269,28 +273,31 @@ static void Exec(commandT* cmd, bool forceFork)
       setpgid(0,0);
       //Usage : int execv(const char *path, char *const argv[]); 
       execv(cmd->name, cmd->argv);
-
-      // If execv returns, it must have failed.
-      printf("execv error, terminated\n");
-      exit(2);
     }
 
     /* This is run by the parent. */
     else {
       //HandleJobs(child_pid);
       if(cmd->bg){
-        //printf("$$$$:");
         addJobList(pid, cmd->argv[0], TRUE);
         sigprocmask(SIG_UNBLOCK, &mask, NULL);
       }
       else {
         fgpid = pid;
-        addJobList(pid, cmd->argv[0], FALSE);
+        //addJobList(pid, cmd->argv[0], FALSE);
         sigprocmask(SIG_UNBLOCK, &mask, NULL);
-        wait(NULL);
+        waitforfg(pid);
     }
   }
 }
+
+/* wait for the fg job to finish */
+static void
+waitforfg(pid_t id)
+{
+  while(fgpid ==id) sleep(1);
+}
+
 
 bgjobL * getLastJob(){
   bgjobL *job = headbgjob;
@@ -377,7 +384,7 @@ void CheckJobs() {
     if (current->state == DONE){
       //print out the finished job
       if(current->bg)
-        printf("[%d]   %-24s%s\n", current->jobC, "DONE", current->cmd);
+        printf("[%d]   %-24s%s\n", current->jobC, "Done", current->cmd);
       //remove the job
       if (previous == NULL)
         headbgjob = current->next;

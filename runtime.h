@@ -55,7 +55,7 @@
 
 pid_t fgpid;
 
-typedef enum { DONE, RUNNING, FG, FGDONE, STOPPED } state_t;
+typedef enum {DONE, RUNNING, STOPPED} state_t;
 
 typedef struct command_t
 {
