@@ -1,3 +1,0 @@
-alias showdir='echo ls'
-showdir
-exit

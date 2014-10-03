@@ -340,12 +340,12 @@ bgjobL * addJobList(pid_t pid, char *cmd, bool isbg){
   return newjob;
 }
 
-static void showjobs()
-{
+static void showjobs() {
+  printf("showing jobs: \n");
   bgjobL *job = headbgjob;
   while (job != NULL) {
 
-   //if (job->bg) {
+   if (job->bg) {
       state_t state = job->state;
       const char* msg =
       (state == DONE ? "Done" :
@@ -355,7 +355,7 @@ static void showjobs()
         printf("[%d]   %-24s%s&\n", job->jobid, msg, job->cmdline);
       else
         printf("[%d]   %-24s%s\n", job->jobid, msg, job->cmdline);
-   //}
+   }
    job = job->next;
   }
 }
@@ -381,7 +381,7 @@ void CheckJobs() {
   while (current != NULL) {
     if (current->state == DONE){
       //print out the finished job
-      //if(current->bg)
+      if(current->bg)
         printf("[%d]   %-24s%s\n", current->jobid, "Done", current->cmdline);
       //remove the job
       if (previous == NULL)
@@ -401,8 +401,8 @@ void CheckJobs() {
 
 }
 
-/*************************singal handle**********
-************************************************/
+//fg (jobid)
+//builtin command handler, switch a bg job to fg
 static void switchToFg(int jobid) {
   bgjobL *job = headbgjob;
   while (job != NULL) {
@@ -418,6 +418,8 @@ static void switchToFg(int jobid) {
   }
 }
 
+//bg (jobid)
+//builtin command handler, restart a stopped bg job
 static void resumeBg(int jobid) {
   bgjobL *job = headbgjob;
   while (job != NULL) {
@@ -429,14 +431,18 @@ static void resumeBg(int jobid) {
   }
 }
 
-//send signal to fg jobs
+//signal handler
+//send SIGINT to fg job group
 void IntFg()
 {
   if (fgpid != -1) 
     kill(-fgpid, SIGINT);
+    printf("\n");
     //FIXME do we need to remove it from list?
 }
 
+//signal handler
+//send SIGTSTP to fg job group
 void StopFg()
 {
   if (fgpid == -1)
@@ -449,7 +455,7 @@ void StopFg()
   }
   job->state = STOPPED;
   kill(-fgpid, SIGTSTP);
-  fgpid = -1; 
+  //fgpid = -1; 
   printf("[%d]   %-24s%s\n", job->jobid, "Stopped", job->cmdline);
 }
 /************************************************/
