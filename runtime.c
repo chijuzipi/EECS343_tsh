@@ -67,11 +67,11 @@
 //a linked list struct
 typedef struct bgjob_l {
   pid_t pid; 
-  int jobC; //job count
+  int jobid; //job count
   struct bgjob_l* next;
   state_t state; //what the status of the job
   bool bg;
-  char *cmd; //the job cmd
+  char *cmdline; //the whole command line input 
 } bgjobL;
 
 /* the pids of the background processes */
@@ -98,16 +98,16 @@ static void Exec(commandT*, bool);
 static void RunBuiltInCmd(commandT*);
 /* checks whether a command is a builtin command */
 static bool IsBuiltIn(char*);
-/* returns an array with the path environment elements */
-static char** getpath(char*);
-/* frees the above array */
-static void freepath(char**);
 /* add a bg job to the list */
 static bgjobL* addJobList(pid_t, char*, bool);
 //list the jobs in the termial
 static void showjobs();
 /* wait for the fg job to finish */
 static void waitforfg();
+/* wait for the fg job to finish */
+static void switchToFg(int jobid);
+/* wait for the fg job to finish */
+static void resumeBg(int jobid); 
 
 /************External Declaration*****************************************/
 
@@ -155,12 +155,10 @@ static void RunBuiltInCmd(commandT* cmd)
         chdir(getenv("HOME"));
     }
     else if (strcmp(cmd->argv[0], "fg") == 0){
-      printf("fg command\n");
-        //fg(cmd);
+        switchToFg(atoi(cmd->argv[1]));
     }
     else if (strcmp(cmd->argv[0], "bg") == 0){
-      printf("bg command\n");
-        //bg(cmd);
+        resumeBg(atoi(cmd->argv[1]));
     }
 }
 
@@ -279,11 +277,12 @@ static void Exec(commandT* cmd, bool forceFork)
     else {
       //HandleJobs(child_pid);
       if(cmd->bg){
-        addJobList(pid, cmd->argv[0], TRUE);
+        addJobList(pid, cmd->cmdline, TRUE);
         sigprocmask(SIG_UNBLOCK, &mask, NULL);
       }
       else {
         fgpid = pid;
+        //fg job does not add to the list
         //addJobList(pid, cmd->argv[0], FALSE);
         sigprocmask(SIG_UNBLOCK, &mask, NULL);
         waitforfg(pid);
@@ -291,13 +290,11 @@ static void Exec(commandT* cmd, bool forceFork)
   }
 }
 
-/* wait for the fg job to finish */
-static void
-waitforfg(pid_t id)
+/* use a busy loop to wait fg */
+static void waitforfg(pid_t id)
 {
   while(fgpid ==id) sleep(1);
 }
-
 
 bgjobL * getLastJob(){
   bgjobL *job = headbgjob;
@@ -324,16 +321,16 @@ bgjobL * addJobList(pid_t pid, char *cmd, bool isbg){
     headbgjob = newjob;
   }
   else{
-    count = lastbgjob->jobC;
+    count = lastbgjob->jobid;
     lastbgjob->next = newjob;
   }
   lastbgjob = newjob;
   // record everying in newjob and return it
   newjob->pid = pid;
   newjob->state = RUNNING; //assume the job is still running
-  newjob->jobC = count + 1;
-  newjob->cmd = (char *)malloc(sizeof(char) * (MAXLINE));
-  strcpy(newjob->cmd, cmd);
+  newjob->jobid = count + 1;
+  newjob->cmdline = (char *)malloc(sizeof(char) * (MAXLINE));
+  strcpy(newjob->cmdline, cmd);
   //int cmdlinelen = strlen(newjob->cmdline);
   // drop the " &" if it's a bg jobx
   if (isbg)
@@ -348,18 +345,19 @@ static void showjobs()
   bgjobL *job = headbgjob;
   while (job != NULL) {
 
-    //only show bg jobs
-   if (job->bg) {
+   //if (job->bg) {
       state_t state = job->state;
       const char* msg =
       (state == DONE ? "Done" :
       (state == RUNNING ? "Running" :
       (state == STOPPED ? "Stopped" : "error")));
-      printf("[%d]   %-24s%s\n", job->jobC, msg, job->cmd);
-   }
+      if (strcmp(msg, "Done") != 0)
+        printf("[%d]   %-24s%s&\n", job->jobid, msg, job->cmdline);
+      else
+        printf("[%d]   %-24s%s\n", job->jobid, msg, job->cmdline);
+   //}
    job = job->next;
   }
-  //fflush(stdout);
 }
 
 //update the job state in list
@@ -383,8 +381,8 @@ void CheckJobs() {
   while (current != NULL) {
     if (current->state == DONE){
       //print out the finished job
-      if(current->bg)
-        printf("[%d]   %-24s%s\n", current->jobC, "Done", current->cmd);
+      //if(current->bg)
+        printf("[%d]   %-24s%s\n", current->jobid, "Done", current->cmdline);
       //remove the job
       if (previous == NULL)
         headbgjob = current->next;
@@ -401,30 +399,36 @@ void CheckJobs() {
     }
   }
 
-  /*
-
-    // delete bg and fg jbos that have finished
-    if (current->state == DONE) {
-      if (current->bg)
-      //print out the finished bg jobs
-	      printf("[%d]   %-24s%s\n", current->jobC, "Done", current->cmd);
-        
-      if (prev == NULL) {
-	      headbgjobs = current->next;
-      } else {
-	      prev->next = current->next;
-      }
-      //free(current->cmd);
-      //free(current);
-        //temp = current->next;
-      // if it was a bg job, report it finished
-    }
-  }
-  */
-} /* CheckJobs */
+}
 
 /*************************singal handle**********
 ************************************************/
+static void switchToFg(int jobid) {
+  bgjobL *job = headbgjob;
+  while (job != NULL) {
+    if (job->jobid == jobid) {
+      // update state, send continue signal, and wait
+      //TODO: shall we remove the job?
+      fgpid = job->pid;
+      job->bg = 0;
+      kill(-fgpid, SIGCONT);
+      waitforfg(job->pid);
+    }
+    job = job->next;
+  }
+}
+
+static void resumeBg(int jobid) {
+  bgjobL *job = headbgjob;
+  while (job != NULL) {
+    if (job->state == STOPPED && job->jobid == jobid) {
+      kill(job->pid, SIGCONT);
+      job->state = RUNNING;
+    }
+    job = job->next;
+  }
+}
+
 //send signal to fg jobs
 void IntFg()
 {
@@ -446,7 +450,7 @@ void StopFg()
   job->state = STOPPED;
   kill(-fgpid, SIGTSTP);
   fgpid = -1; 
-  printf("[%d]   %-24s%s\n", job->jobC, "Stopped", job->cmd);
+  printf("[%d]   %-24s%s\n", job->jobid, "Stopped", job->cmdline);
 }
 /************************************************/
 
