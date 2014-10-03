@@ -81,6 +81,7 @@ int main (int argc, char *argv[])
   {
     //print the prompt
     /* read command line */
+    printf("$$$$: ");
     getCommandLine(&cmdLine, BUFSIZE);
 
     //handle ctrl-d to terminate the shell
