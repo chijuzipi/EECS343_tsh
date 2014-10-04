@@ -28,6 +28,7 @@ echo;
 
 # Untar sources
 echo "UNTAR";
+cp ${TARGZ} ${SRCDIR} || { cleanUp; exit 1; }
 cd ${SRCDIR} || { cleanUp; exit 1; }
 tar xvfz ${TARGZ} || { cleanUp; exit 1; }
 

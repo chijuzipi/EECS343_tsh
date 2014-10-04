@@ -171,7 +171,7 @@ static void RunExternalCmd(commandT* cmd, bool fork)
   }
   else {
     printf("%s: command not found\n", cmd->argv[0]);
-    //fflush(stdout);
+    fflush(stdout);
     ReleaseCmdT(&cmd);
   }
 }
@@ -341,7 +341,6 @@ bgjobL * addJobList(pid_t pid, char *cmd, bool isbg){
 }
 
 static void showjobs() {
-  printf("showing jobs: \n");
   bgjobL *job = headbgjob;
   while (job != NULL) {
 
@@ -358,6 +357,7 @@ static void showjobs() {
    }
    job = job->next;
   }
+  fflush(stdout);
 }
 
 //update the job state in list
@@ -398,6 +398,7 @@ void CheckJobs() {
       current = current->next;
     }
   }
+  fflush(stdout);
 
 }
 
@@ -437,7 +438,8 @@ void IntFg()
 {
   if (fgpid != -1) 
     kill(-fgpid, SIGINT);
-    printf("\n");
+    //printf("\n");
+    //fflush(stdout);
     //FIXME do we need to remove it from list?
 }
 
@@ -455,8 +457,9 @@ void StopFg()
   }
   job->state = STOPPED;
   kill(-fgpid, SIGTSTP);
-  //fgpid = -1; 
+  fgpid = -1; 
   printf("[%d]   %-24s%s\n", job->jobid, "Stopped", job->cmdline);
+  fflush(stdout);
 }
 /************************************************/
 

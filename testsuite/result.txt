@@ -1,0 +1,372 @@
+Using reference shell 64
+Testing Yu-20141003173334-tsh.tar.gz
+
+UNTAR
+
+COMPILE
+compile /tmp/cs343.tests.QM6smq/interpreter.c
+compile /tmp/cs343.tests.QM6smq/io.c
+compile /tmp/cs343.tests.QM6smq/runtime.c
+compile /tmp/cs343.tests.QM6smq/tsh.c
+LINKING
+0 warning(s) found while compiling
+0 error(s) found while compiling
+
+RUN BASIC TEST CASES
+test33: PASS
+test34: PASS
+test01: PASS
+test02: PASS
+test03: PASS
+test04: PASS
+test05: PASS
+test06: PASS
+test07: PASS
+test08: PASS
+test09: FAILED
+Input:
+echo start
+./myspin 10
+SLEEP 2
+INT
+echo end 
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+start										start
+end									      <
+
+									      >	end
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test10: PASS
+test11: FAILED
+Input:
+./myspin 4 &
+./myspin 5 
+SLEEP 2
+TSTP
+SLEEP 1
+jobs
+fg 2
+SLEEP 4
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+									      <
+[2]   Stopped                 ./myspin 5 				      <
+[1]   Running                 ./myspin 4 &				      <
+[2]   Stopped                 ./myspin 5 				      <
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test12: FAILED
+Input:
+./myspin 4 &
+./myspin 5 
+SLEEP 2
+TSTP
+SLEEP 1
+jobs
+bg 2
+jobs
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+									      <
+[2]   Stopped                 ./myspin 5 				      <
+[1]   Running                 ./myspin 4 &				      <
+[2]   Stopped                 ./myspin 5 				      <
+[1]   Running                 ./myspin 4 &				      <
+[2]   Running                 ./myspin 5 &				      <
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test13: FAILED
+Input:
+./myspin 5 &
+SLEEP 1
+fg 1
+SLEEP 1
+TSTP
+SLEEP 1
+jobs
+fg 1
+jobs
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+									      <
+[1]   Stopped                 ./myspin 5 				      <
+[1]   Stopped                 ./myspin 5 					[1]   Stopped                 ./myspin 5 
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test14: FAILED
+Input:
+bash -c "sleep 4; echo hello1;"
+SLEEP 1
+TSTP
+SLEEP 1
+jobs
+bg 1
+jobs
+fg 1
+echo hello2 
+sleep 4
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+									      <
+[1]   Stopped                 bash -c "sleep 4; echo hello1;"		      <
+[1]   Stopped                 bash -c "sleep 4; echo hello1;" 		      <
+[1]   Running                 bash -c "sleep 4; echo hello1;" &		      <
+hello1									      <
+hello2									      <
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test15: FAILED
+Input:
+ls test.5
+SLEEP 1
+INT
+pwd
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+test.5										test.5
+/tmp/cs343.tests.BuZNzh							      <
+
+									      >	/tmp/cs343.tests.BuZNzh
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test16: FAILED
+Input:
+SLEEP 1
+TSTP
+SLEEP 1
+TSTP
+SLEEP 1
+ls test.4
+SLEEP 1
+INT
+SLEEP 1
+TSTP
+SLEEP 1
+INT
+SLEEP 1
+ls -l test.5
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+test.4										test.4
+-rw-r--r--  1 Yu  wheel  47 Oct  3 17:34 test.5				      <
+
+
+									      >	-rw-r--r--  1 Yu  wheel  47 Oct  3 17:34 test.5
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test17: FAILED
+Input:
+bash -c "sleep 3; echo hello1;"
+SLEEP 1
+TSTP
+jobs
+bg 1
+jobs
+fg 1
+echo hello2
+jobs
+bash -c "sleep 3; echo hello3;" &
+jobs
+fg 1
+echo hello4
+sleep 3
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+									      <
+[1]   Stopped                 bash -c "sleep 3; echo hello1;"		      <
+[1]   Stopped                 bash -c "sleep 3; echo hello1;" 		      <
+[1]   Running                 bash -c "sleep 3; echo hello1;" &		      <
+hello1									      <
+hello2									      <
+[1]   Running                 bash -c "sleep 3; echo hello3;" &		      <
+hello3									      <
+hello4									      <
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test18: PASS
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+12 basic test cases passed
+
+RUN EXTRA CREDIT TEST CASES
+test29: FAILED
+Input:
+alias showdir='ls'
+alias foo='ls -lh'
+alias test='whoami'
+alias
+unalias showdir
+unalias foo
+unalias test
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+alias foo='ls -lh'							      |	/usr/bin/unalias: line 4: unalias: showdir: not found
+alias showdir='ls'							      |	/usr/bin/unalias: line 4: unalias: foo: not found
+alias test='whoami'							      |	/usr/bin/unalias: line 4: unalias: test: not found
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test30: FAILED
+Input:
+alias showdir='ls '
+alias home='~/'
+showdir home
+unalias showdir
+unalias home
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+Applications								      |	showdir: command not found
+Desktop									      |	/usr/bin/unalias: line 4: unalias: showdir: not found
+Documents								      |	/usr/bin/unalias: line 4: unalias: home: not found
+Downloads								      <
+Dropbox									      <
+Library									      <
+Movies									      <
+Music									      <
+Pictures								      <
+Public									      <
+VirtualBox VMs								      <
+algs4									      <
+tmp									      <
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test20: FAILED
+Input:
+ls -l | grep test
+ls -l | grep 2
+ls -l | wc -l
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+-rw-r--r--  1 Yu  wheel     43 Oct  3 17:34 test.20			      <
+-rw-r--r--  1 Yu  wheel     25 Oct  3 17:34 test.200			      <
+-rw-r--r--  1 Yu  wheel     24 Oct  3 17:34 test.23			      <
+-rw-r--r--  1 Yu  wheel     23 Oct  3 17:34 test.3			      <
+-rw-r--r--  1 Yu  wheel     39 Oct  3 17:34 test.4			      <
+-rw-r--r--  1 Yu  wheel     47 Oct  3 17:34 test.5			      <
+-rw-r--r--  1 Yu  wheel     32 Oct  3 17:34 test1.txt			      <
+total 328								      <
+drwxr-xr-x  3 Yu  wheel    102 Oct  3 17:34 dir21			      <
+-rw-r--r--  1 Yu  wheel   6216 Oct  3 17:34 io.o			      <
+-rw-r--r--  1 Yu  wheel     43 Oct  3 17:34 test.20			      <
+-rw-r--r--  1 Yu  wheel     25 Oct  3 17:34 test.200			      <
+-rw-r--r--  1 Yu  wheel     24 Oct  3 17:34 test.23			      <
+-rw-r--r--  1 Yu  wheel     23 Oct  3 17:34 test.3			      <
+-rw-r--r--  1 Yu  wheel     32 Oct  3 17:34 test1.txt			      <
+-rw-r--r--  1 Yu  wheel     15 Oct  3 17:34 text2.txt			      <
+-rwxr-xr-x  1 Yu  wheel  22060 Oct  3 17:34 tsh				      <
+-rwxr-xr-x  1 Yu  wheel  28020 Oct  3 17:34 tsh-orig.64			      <
+      24								      <
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test22: FAILED
+Input:
+ls -l test.3 test.4 test.5 test.23 | wc -w
+grep test longlist.txt
+cat longlist.txt
+grep 3 longlist.txt | wc -w | cat | wc
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+      36								      <
+2 test										2 test
+3 test										3 test
+2 test										2 test
+-e longlist									-e longlist
+txt										txt
+2 test										2 test
+2 world										2 world
+3 test										3 test
+2 test										2 test
+       1       1       9						      <
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test23: FAILED
+Input:
+ls -l | grep test
+ls -l | grep test | grep 2
+ls -l | grep test | grep 2 | wc
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+-rw-r--r--  1 Yu  wheel     43 Oct  3 17:34 test.20			      <
+-rw-r--r--  1 Yu  wheel     25 Oct  3 17:34 test.200			      <
+-rw-r--r--  1 Yu  wheel     24 Oct  3 17:34 test.23			      <
+-rw-r--r--  1 Yu  wheel     23 Oct  3 17:34 test.3			      <
+-rw-r--r--  1 Yu  wheel     39 Oct  3 17:34 test.4			      <
+-rw-r--r--  1 Yu  wheel     47 Oct  3 17:34 test.5			      <
+-rw-r--r--  1 Yu  wheel     32 Oct  3 17:34 test1.txt			      <
+-rw-r--r--  1 Yu  wheel     43 Oct  3 17:34 test.20			      <
+-rw-r--r--  1 Yu  wheel     25 Oct  3 17:34 test.200			      <
+-rw-r--r--  1 Yu  wheel     24 Oct  3 17:34 test.23			      <
+-rw-r--r--  1 Yu  wheel     23 Oct  3 17:34 test.3			      <
+-rw-r--r--  1 Yu  wheel     32 Oct  3 17:34 test1.txt			      <
+       5      45     262						      <
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test31: FAILED
+Input:
+ls -la ../ > dir.test.txt
+wc < dir.test.txt
+pwd > cur.dir.test.txt
+ls < cur.dir.test.txt 
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+      24     209    1592						      |	total 0
+									      >	drwxrwxrwt  23 root        wheel   782 Oct  3 17:34 .
+									      >	drwxr-xr-x@  6 root        wheel   204 Oct 31  2013 ..
+									      >	drwx------   4 Yu          wheel   136 Oct  3 13:45 .vbox-Yu-ipc
+									      >	drwx------  25 Yu          wheel   850 Oct  3 15:54 cs343.tests.20Q9k8
+									      >	drwx------  11 Yu          wheel   374 Oct  3 15:54 cs343.tests.3Ny8cz
+									      >	drwx------  55 Yu          wheel  1870 Oct  3 17:37 cs343.tests.635Tpk
+									      >	drwx------  25 Yu          wheel   850 Oct  3 15:54 cs343.tests.ASCcKK
+									      >	drwx------  25 Yu          wheel   850 Oct  3 17:33 cs343.tests.BqgVdu
+									      >	drwx------  27 Yu          wheel   918 Oct  3 17:37 cs343.tests.BuZNzh
+									      >	drwx------  10 Yu          wheel   340 Oct  3 15:54 cs343.tests.IgTz4u
+									      >	drwx------  24 Yu          wheel   816 Oct  3 15:54 cs343.tests.MNzqd1
+									      >	drwx------  14 Yu          wheel   476 Oct  3 17:34 cs343.tests.QM6smq
+									      >	drwx------  14 Yu          wheel   476 Oct  3 17:33 cs343.tests.S7OWT1
+									      >	drwx------  14 Yu          wheel   476 Oct  3 15:54 cs343.tests.dUvqP8
+									      >	drwx------  11 Yu          wheel   374 Oct  3 17:34 cs343.tests.i2Dsj3
+									      >	drwx------  14 Yu          wheel   476 Oct  3 15:54 cs343.tests.m5UIsh
+									      >	drwx------  11 Yu          wheel   374 Oct  3 15:54 cs343.tests.oebxMW
+									      >	drwx------  14 Yu          wheel   476 Oct  3 15:54 cs343.tests.sAEb1B
+									      >	drwx------   3 Yu          wheel   102 Oct  2 23:25 launch-KWdjIG
+									      >	drwx------   3 Yu          wheel   102 Oct  2 23:25 launch-Ql7E2P
+									      >	drwx------   3 Yu          wheel   102 Oct  2 23:25 launchd-263.P0PiSr
+									      >	drwx------   3 _spotlight  wheel   102 Oct  2 23:26 launchd-415.E4MoJ4
+									      >	drwx------   3 root        wheel   102 Oct  3 11:41 launchd-787.4HBbxQ
+									      >	       0       0       0
+									      >	/tmp/cs343.tests.BuZNzh
+cat.txtt									cat.txtt
+catdogexit.txt									catdogexit.txt
+cur.dir.test.txt								cur.dir.test.txt
+dir.test.txt									dir.test.txt
+dir21										dir21
+dogcatexit.exit									dogcatexit.exit
+dogexit.txt									dogexit.txt
+dummy										dummy
+interpreter.o									interpreter.o
+io.o										io.o
+longlist.txt									longlist.txt
+myspin										myspin
+runtime.o									runtime.o
+sdriver.pl									sdriver.pl
+test.20										test.20
+test.200									test.200
+test.23										test.23
+test.3										test.3
+test.4										test.4
+test.5										test.5
+test1.txt									test1.txt
+text2.txt									text2.txt
+tsh										tsh
+tsh-orig.64									tsh-orig.64
+tsh.o										tsh.o
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test32: FAILED
+Input:
+pwd > cur.dir.txt
+cat cur.dir.txt
+wc < cur.dir.txt > file.test.txt
+cat file.test.txt
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+/tmp/cs343.tests.BuZNzh								/tmp/cs343.tests.BuZNzh
+									      >	/tmp/cs343.tests.BuZNzh
+									      >	       0       0       0
+       1       1      24							       1       1      24
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+0 extra credit test cases passed
+
+CHECK FOR MEMORY LEAKS
+0 possible leaks
+0 leaks
+0 still reachable
