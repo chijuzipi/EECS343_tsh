@@ -1,0 +1,292 @@
+Using reference shell 64
+Testing Yu-20141003210356-tsh.tar.gz
+
+UNTAR
+
+COMPILE
+compile /tmp/cs343.tests.AG1Oxy/interpreter.c
+compile /tmp/cs343.tests.AG1Oxy/io.c
+compile /tmp/cs343.tests.AG1Oxy/runtime.c
+compile /tmp/cs343.tests.AG1Oxy/tsh.c
+LINKING
+0 warning(s) found while compiling
+0 error(s) found while compiling
+
+RUN BASIC TEST CASES
+test33: PASS
+test34: PASS
+test01: PASS
+test02: PASS
+test03: PASS
+test04: PASS
+test05: PASS
+test06: PASS
+test07: PASS
+test08: PASS
+test09: PASS
+test10: PASS
+test11: PASS
+test12: FAILED
+Input:
+./myspin 4 &
+./myspin 5 
+SLEEP 2
+TSTP
+SLEEP 1
+jobs
+bg 2
+jobs
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+									      <
+[2]   Stopped                 ./myspin 5 					[2]   Stopped                 ./myspin 5 
+[1]   Running                 ./myspin 4 &					[1]   Running                 ./myspin 4 &
+[2]   Stopped                 ./myspin 5 					[2]   Stopped                 ./myspin 5 
+[1]   Running                 ./myspin 4 &					[1]   Running                 ./myspin 4 &
+[2]   Running                 ./myspin 5 &				      |	[2]   Running                 ./myspin 5 
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test13: PASS
+test14: FAILED
+Input:
+bash -c "sleep 4; echo hello1;"
+SLEEP 1
+TSTP
+SLEEP 1
+jobs
+bg 1
+jobs
+fg 1
+echo hello2 
+sleep 4
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+									      <
+[1]   Stopped                 bash -c "sleep 4; echo hello1;"			[1]   Stopped                 bash -c "sleep 4; echo hello1;"
+[1]   Stopped                 bash -c "sleep 4; echo hello1;" 		      |	[1]   Stopped                 bash -c "sleep 4; echo hello1;"
+[1]   Running                 bash -c "sleep 4; echo hello1;" &		      |	[1]   Running                 bash -c "sleep 4; echo hello1;"
+hello1										hello1
+hello2										hello2
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test15: PASS
+test16: PASS
+test17: FAILED
+Input:
+bash -c "sleep 3; echo hello1;"
+SLEEP 1
+TSTP
+jobs
+bg 1
+jobs
+fg 1
+echo hello2
+jobs
+bash -c "sleep 3; echo hello3;" &
+jobs
+fg 1
+echo hello4
+sleep 3
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+									      <
+[1]   Stopped                 bash -c "sleep 3; echo hello1;"			[1]   Stopped                 bash -c "sleep 3; echo hello1;"
+[1]   Stopped                 bash -c "sleep 3; echo hello1;" 		      |	[1]   Stopped                 bash -c "sleep 3; echo hello1;"
+[1]   Running                 bash -c "sleep 3; echo hello1;" &		      |	[1]   Running                 bash -c "sleep 3; echo hello1;"
+hello1										hello1
+hello2										hello2
+[1]   Running                 bash -c "sleep 3; echo hello3;" &			[1]   Running                 bash -c "sleep 3; echo hello3;" &
+hello3										hello3
+hello4										hello4
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test18: PASS
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+17 basic test cases passed
+
+RUN EXTRA CREDIT TEST CASES
+test29: FAILED
+Input:
+alias showdir='ls'
+alias foo='ls -lh'
+alias test='whoami'
+alias
+unalias showdir
+unalias foo
+unalias test
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+alias foo='ls -lh'							      |	/usr/bin/unalias: line 4: unalias: showdir: not found
+alias showdir='ls'							      |	/usr/bin/unalias: line 4: unalias: foo: not found
+alias test='whoami'							      |	/usr/bin/unalias: line 4: unalias: test: not found
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test30: FAILED
+Input:
+alias showdir='ls '
+alias home='~/'
+showdir home
+unalias showdir
+unalias home
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+Applications								      |	showdir: command not found
+Desktop									      |	/usr/bin/unalias: line 4: unalias: showdir: not found
+Documents								      |	/usr/bin/unalias: line 4: unalias: home: not found
+Downloads								      <
+Dropbox									      <
+Library									      <
+Movies									      <
+Music									      <
+Pictures								      <
+Public									      <
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test20: FAILED
+Input:
+ls -l | grep test
+ls -l | grep 2
+ls -l | wc -l
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+-rw-r--r--  1 fangwang  wheel     43 Oct  3 22:37 test.20		      <
+-rw-r--r--  1 fangwang  wheel     25 Oct  3 22:37 test.200		      <
+-rw-r--r--  1 fangwang  wheel     24 Oct  3 22:37 test.23		      <
+-rw-r--r--  1 fangwang  wheel     23 Oct  3 22:37 test.3		      <
+-rw-r--r--  1 fangwang  wheel     39 Oct  3 22:37 test.4		      <
+-rw-r--r--  1 fangwang  wheel     47 Oct  3 22:37 test.5		      <
+-rw-r--r--  1 fangwang  wheel     32 Oct  3 22:37 test1.txt		      <
+-rw-r--r--  1 fangwang  wheel     38 Oct  3 22:37 cat.txtt		      <
+-rw-r--r--  1 fangwang  wheel      0 Oct  3 22:37 catdogexit.txt	      <
+drwxr-xr-x  3 fangwang  wheel    102 Oct  3 22:37 dir21			      <
+-rw-r--r--  1 fangwang  wheel      0 Oct  3 22:37 dogcatexit.exit	      <
+-rw-r--r--  1 fangwang  wheel      0 Oct  3 22:37 dogexit.txt		      <
+-rw-r--r--  1 fangwang  wheel     15 Oct  3 22:37 dummy			      <
+-rw-r--r--  1 fangwang  wheel  10464 Oct  3 22:37 interpreter.o		      <
+-rw-r--r--  1 fangwang  wheel   6276 Oct  3 22:37 io.o			      <
+-rw-r--r--  1 fangwang  wheel     45 Oct  3 22:37 longlist.txt		      <
+-rwxr-xr-x  1 fangwang  wheel   8684 Oct  3 22:37 myspin		      <
+-rw-r--r--  1 fangwang  wheel  20628 Oct  3 22:37 runtime.o		      <
+-rwxr-xr-x  1 fangwang  wheel   5546 Oct  3 22:37 sdriver.pl		      <
+-rw-r--r--  1 fangwang  wheel     43 Oct  3 22:37 test.20		      <
+-rw-r--r--  1 fangwang  wheel     25 Oct  3 22:37 test.200		      <
+-rw-r--r--  1 fangwang  wheel     24 Oct  3 22:37 test.23		      <
+-rw-r--r--  1 fangwang  wheel     23 Oct  3 22:37 test.3		      <
+-rw-r--r--  1 fangwang  wheel     39 Oct  3 22:37 test.4		      <
+-rw-r--r--  1 fangwang  wheel     47 Oct  3 22:37 test.5		      <
+-rw-r--r--  1 fangwang  wheel     32 Oct  3 22:37 test1.txt		      <
+-rw-r--r--  1 fangwang  wheel     15 Oct  3 22:37 text2.txt		      <
+-rwxr-xr-x  1 fangwang  wheel  22060 Oct  3 22:37 tsh			      <
+-rwxr-xr-x  1 fangwang  wheel  28020 Oct  3 22:37 tsh-orig.64		      <
+-rw-r--r--  1 fangwang  wheel   5944 Oct  3 22:37 tsh.o			      <
+      24								      <
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test22: FAILED
+Input:
+ls -l test.3 test.4 test.5 test.23 | wc -w
+grep test longlist.txt
+cat longlist.txt
+grep 3 longlist.txt | wc -w | cat | wc
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+      36								      <
+2 test										2 test
+3 test										3 test
+2 test										2 test
+-e longlist									-e longlist
+txt										txt
+2 test										2 test
+2 world										2 world
+3 test										3 test
+2 test										2 test
+       1       1       9						      <
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test23: FAILED
+Input:
+ls -l | grep test
+ls -l | grep test | grep 2
+ls -l | grep test | grep 2 | wc
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+-rw-r--r--  1 fangwang  wheel     43 Oct  3 22:37 test.20		      <
+-rw-r--r--  1 fangwang  wheel     25 Oct  3 22:37 test.200		      <
+-rw-r--r--  1 fangwang  wheel     24 Oct  3 22:37 test.23		      <
+-rw-r--r--  1 fangwang  wheel     23 Oct  3 22:37 test.3		      <
+-rw-r--r--  1 fangwang  wheel     39 Oct  3 22:37 test.4		      <
+-rw-r--r--  1 fangwang  wheel     47 Oct  3 22:37 test.5		      <
+-rw-r--r--  1 fangwang  wheel     32 Oct  3 22:37 test1.txt		      <
+-rw-r--r--  1 fangwang  wheel     43 Oct  3 22:37 test.20		      <
+-rw-r--r--  1 fangwang  wheel     25 Oct  3 22:37 test.200		      <
+-rw-r--r--  1 fangwang  wheel     24 Oct  3 22:37 test.23		      <
+-rw-r--r--  1 fangwang  wheel     23 Oct  3 22:37 test.3		      <
+-rw-r--r--  1 fangwang  wheel     39 Oct  3 22:37 test.4		      <
+-rw-r--r--  1 fangwang  wheel     47 Oct  3 22:37 test.5		      <
+-rw-r--r--  1 fangwang  wheel     32 Oct  3 22:37 test1.txt		      <
+       7      63     406						      <
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test31: FAILED
+Input:
+ls -la ../ > dir.test.txt
+wc < dir.test.txt
+pwd > cur.dir.test.txt
+ls < cur.dir.test.txt 
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+      13     110     847						      |	total 6328
+									      >	drwxrwxrwt  12 root        wheel      408 Oct  3 22:39 .
+									      >	drwxr-xr-x@  6 root        wheel      204 Jun 28 03:36 ..
+									      >	drwx------  14 fangwang    wheel      476 Oct  3 22:37 cs343.tests.AG1Oxy
+									      >	drwx------  27 fangwang    wheel      918 Oct  3 22:40 cs343.tests.WV2gEQ
+									      >	drwx------  55 fangwang    wheel     1870 Oct  3 22:40 cs343.tests.llmT8C
+									      >	drwx------   3 fangwang    wheel      102 Sep 21 00:36 launch-GUkhBu
+									      >	drwx------   3 fangwang    wheel      102 Sep 21 00:36 launch-WB492s
+									      >	drwx------   3 fangwang    wheel      102 Sep 21 00:36 launchd-163.UoK7Ve
+									      >	drwx------   3 _spotlight  wheel      102 Sep 21 00:36 launchd-293.BzCwH5
+									      >	drwx------   3 root        wheel      102 Sep 22 16:46 launchd-558.kBKZWt
+									      >	-rw-r--r--   1 root        wheel  2879029 Sep 22 20:18 spindump.txt
+									      >	-rw-r--r--   1 root        wheel   356926 Sep 22 20:20 wifi-FDWiD8.log
+									      >	       0       0       0
+									      >	/tmp/cs343.tests.WV2gEQ
+cat.txtt									cat.txtt
+catdogexit.txt									catdogexit.txt
+cur.dir.test.txt								cur.dir.test.txt
+dir.test.txt									dir.test.txt
+dir21										dir21
+dogcatexit.exit									dogcatexit.exit
+dogexit.txt									dogexit.txt
+dummy										dummy
+interpreter.o									interpreter.o
+io.o										io.o
+longlist.txt									longlist.txt
+myspin										myspin
+runtime.o									runtime.o
+sdriver.pl									sdriver.pl
+test.20										test.20
+test.200									test.200
+test.23										test.23
+test.3										test.3
+test.4										test.4
+test.5										test.5
+test1.txt									test1.txt
+text2.txt									text2.txt
+tsh										tsh
+tsh-orig.64									tsh-orig.64
+tsh.o										tsh.o
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test32: FAILED
+Input:
+pwd > cur.dir.txt
+cat cur.dir.txt
+wc < cur.dir.txt > file.test.txt
+cat file.test.txt
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+/tmp/cs343.tests.WV2gEQ								/tmp/cs343.tests.WV2gEQ
+									      >	/tmp/cs343.tests.WV2gEQ
+									      >	       0       0       0
+       1       1      24							       1       1      24
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+0 extra credit test cases passed
+
+CHECK FOR MEMORY LEAKS
+0 possible leaks
+0 leaks
+0 still reachable

@@ -101,7 +101,7 @@ static bool IsBuiltIn(char*);
 /* add a bg job to the list */
 static bgjobL* addJobList(pid_t, char*, bool);
 //list the jobs in the termial
-static void showjobs();
+static void ShowJobs();
 /* wait for the fg job to finish */
 static void waitforfg();
 /* wait for the fg job to finish */
@@ -146,7 +146,7 @@ void RunCmdFork(commandT* cmd, bool fork)
 static void RunBuiltInCmd(commandT* cmd)
 { 
     if (strcmp(cmd->argv[0], "jobs") == 0) {
-      showjobs();
+      ShowJobs();
     }
     else if (strcmp(cmd->argv[0], "cd") == 0) {
       if (cmd->argc > 1)
@@ -340,7 +340,7 @@ bgjobL * addJobList(pid_t pid, char *cmd, bool isbg){
   return newjob;
 }
 
-static void showjobs() {
+static void ShowJobs() {
   bgjobL *job = headbgjob;
   while (job != NULL) {
 
@@ -351,7 +351,7 @@ static void showjobs() {
       (state == RUNNING ? "Running" :
       (state == STOPPED ? "Stopped" : "error")));
       if (strcmp(msg, "Done") != 0 && job->bg)
-        printf("[%d]   %-24s%s&\n", job->jobid, msg, job->cmdline);
+        printf("[%d]   %-24s%s &\n", job->jobid, msg, job->cmdline);
       else
         printf("[%d]   %-24s%s\n", job->jobid, msg, job->cmdline);
    }
@@ -409,7 +409,6 @@ static void switchToFg(int jobid) {
   while (job != NULL) {
     if (job->jobid == jobid) {
       // update state, send continue signal, and wait
-      //TODO: shall we remove the job?
       fgpid = job->pid;
       job->bg = 0;
       kill(-fgpid, SIGCONT);
@@ -426,6 +425,8 @@ static void resumeBg(int jobid) {
   while (job != NULL) {
     if (job->state == STOPPED && job->jobid == jobid) {
       kill(job->pid, SIGCONT);
+      //FIXME if this is a fg job, make it bg
+      job->bg = 1;
       job->state = RUNNING;
     }
     job = job->next;
@@ -445,7 +446,7 @@ void IntFg()
 }
 
 //signal handler
-//send SIGTSTP to fg job group
+//send SIGTSTP (suspend a fg job) to fg job group
 void StopFg()
 {
   if (fgpid == -1){
