@@ -72,9 +72,12 @@ int main (int argc, char *argv[])
   char* cmdLine = malloc(sizeof(char*)*BUFSIZE);
 
   /* shell initialization */
+  //adding event listener
   if (signal(SIGINT, sig) == SIG_ERR) PrintPError("SIGINT");
   if (signal(SIGTSTP, sig) == SIG_ERR) PrintPError("SIGTSTP");
   if (signal(SIGCHLD, sig) == SIG_ERR) PrintPError("SIGCHLD");
+
+  // global varialbe to track fg process id 
   fgpid = -1;
 
   while (!forceExit) /* repeat forever */

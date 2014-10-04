@@ -99,11 +99,11 @@ static void RunBuiltInCmd(commandT*);
 /* checks whether a command is a builtin command */
 static bool IsBuiltIn(char*);
 /* add a bg job to the list */
-static bgjobL* addJobList(pid_t, char*, bool);
+static void addJobList(pid_t, char*, bool);
 //list the jobs in the termial
 static void ShowJobs();
 /* wait for the fg job to finish */
-static void waitforfg();
+static void waitfg();
 /* wait for the fg job to finish */
 static void switchToFg(int jobid);
 /* wait for the fg job to finish */
@@ -283,20 +283,22 @@ static void Exec(commandT* cmd, bool forceFork)
       }
       else {
         fgpid = pid;
-        //fg job does not add to the list
+        //FIXME the fg job also add to the list, with the "isbg" parameter set to FALSE
         addJobList(pid, cmd->cmdline, FALSE);
         sigprocmask(SIG_UNBLOCK, &mask, NULL);
-        waitforfg(pid);
+        waitfg(pid);
     }
   }
 }
 
 /* use a busy loop to wait fg */
-static void waitforfg(pid_t id)
+static void waitfg(pid_t id)
 {
+  //every 1 sec check the status of fg job
   while(fgpid ==id) sleep(1);
 }
 
+/*get the last job of the linked list*/
 bgjobL * getLastJob(){
   bgjobL *job = headbgjob;
   while (job != NULL) {
@@ -309,14 +311,11 @@ bgjobL * getLastJob(){
   return job;
 }
 
-bgjobL * addJobList(pid_t pid, char *cmd, bool isbg){
-  //printf("adding job\n");
+//add the new job to the end of the list
+static void addJobList(pid_t pid, char *cmd, bool isbg){
   bgjobL *lastbgjob = getLastJob();
   bgjobL *newjob = (bgjobL *)malloc(sizeof(bgjobL));
   newjob->next = NULL;
-  //int maxjobid = 0;
-  // add the job to the beginning of the list
-  // (bg jobs is in descending order of age)
   int count = 0;
   if (lastbgjob == NULL) {
     headbgjob = newjob;
@@ -332,13 +331,12 @@ bgjobL * addJobList(pid_t pid, char *cmd, bool isbg){
   newjob->jobid = count + 1;
   newjob->cmdline = (char *)malloc(sizeof(char) * (MAXLINE));
   strcpy(newjob->cmdline, cmd);
-  //int cmdlinelen = strlen(newjob->cmdline);
-  // drop the " &" if it's a bg jobx
+
   if (isbg)
     newjob->bg = 1;
   else
     newjob->bg = 0;
-  return newjob;
+  //return newjob;
 }
 
 static void ShowJobs() {
@@ -363,7 +361,6 @@ static void ShowJobs() {
 
 //update the job state in list
 void UpdateBgJob(pid_t pid, state_t newstate){
-  //printf("updating bg job....");
   bgjobL *current;
   current = headbgjob;
   while (current != NULL) {
@@ -404,7 +401,7 @@ void CheckJobs() {
 }
 
 //fg (jobid)
-//builtin command handler, switch a bg job to fg
+//builin command handler, switch a bg job to fg, start it
 static void switchToFg(int jobid) {
   bgjobL *job = headbgjob;
   while (job != NULL) {
@@ -413,14 +410,14 @@ static void switchToFg(int jobid) {
       fgpid = job->pid;
       job->bg = 0;
       kill(-fgpid, SIGCONT);
-      waitforfg(job->pid);
+      waitfg(job->pid);
     }
     job = job->next;
   }
 }
 
 //bg (jobid)
-//builtin command handler, restart a stopped bg job
+//builtin command handler, start a bg job
 static void resumeBg(int jobid) {
   bgjobL *job = headbgjob;
   while (job != NULL) {
@@ -441,8 +438,6 @@ void IntFg()
 {
   if (fgpid != -1) 
     kill(-fgpid, SIGINT);
-    //printf("\n");
-    //fflush(stdout);
     //FIXME do we need to remove it from list?
 }
 
@@ -453,7 +448,6 @@ void StopFg()
   if (fgpid == -1){
     return;
   }
-  //printf("$455: fgpid is %d\n", fgpid);
   bgjobL *job = headbgjob;
   while (job != NULL) {
     if (job->pid == fgpid)
