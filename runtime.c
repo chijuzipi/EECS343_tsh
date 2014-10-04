@@ -267,7 +267,8 @@ static void Exec(commandT* cmd, bool forceFork)
 
     /* This is run by the child. execute the command */
     if(pid == 0) {
-      //to group the processs 
+
+      //group the processs 
       setpgid(0,0);
       //Usage : int execv(const char *path, char *const argv[]); 
       execv(cmd->name, cmd->argv);
