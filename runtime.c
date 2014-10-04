@@ -283,7 +283,7 @@ static void Exec(commandT* cmd, bool forceFork)
       else {
         fgpid = pid;
         //fg job does not add to the list
-        //addJobList(pid, cmd->argv[0], FALSE);
+        addJobList(pid, cmd->cmdline, FALSE);
         sigprocmask(SIG_UNBLOCK, &mask, NULL);
         waitforfg(pid);
     }
@@ -344,13 +344,13 @@ static void showjobs() {
   bgjobL *job = headbgjob;
   while (job != NULL) {
 
-   if (job->bg) {
+   if (!(!job->bg && job->state == DONE)) {
       state_t state = job->state;
       const char* msg =
       (state == DONE ? "Done" :
       (state == RUNNING ? "Running" :
       (state == STOPPED ? "Stopped" : "error")));
-      if (strcmp(msg, "Done") != 0)
+      if (strcmp(msg, "Done") != 0 && job->bg)
         printf("[%d]   %-24s%s&\n", job->jobid, msg, job->cmdline);
       else
         printf("[%d]   %-24s%s\n", job->jobid, msg, job->cmdline);
@@ -432,6 +432,7 @@ static void resumeBg(int jobid) {
   }
 }
 
+/************************************************/
 //signal handler
 //send SIGINT to fg job group
 void IntFg()
@@ -447,8 +448,10 @@ void IntFg()
 //send SIGTSTP to fg job group
 void StopFg()
 {
-  if (fgpid == -1)
+  if (fgpid == -1){
     return;
+  }
+  //printf("$455: fgpid is %d\n", fgpid);
   bgjobL *job = headbgjob;
   while (job != NULL) {
     if (job->pid == fgpid)

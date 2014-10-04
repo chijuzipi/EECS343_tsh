@@ -1,13 +1,13 @@
 Using reference shell 64
-Testing Yu-20141003173334-tsh.tar.gz
+Testing Yu-20141003195106-tsh.tar.gz
 
 UNTAR
 
 COMPILE
-compile /tmp/cs343.tests.QM6smq/interpreter.c
-compile /tmp/cs343.tests.QM6smq/io.c
-compile /tmp/cs343.tests.QM6smq/runtime.c
-compile /tmp/cs343.tests.QM6smq/tsh.c
+compile /tmp/cs343.tests.QZNMDb/interpreter.c
+compile /tmp/cs343.tests.QZNMDb/io.c
+compile /tmp/cs343.tests.QZNMDb/runtime.c
+compile /tmp/cs343.tests.QZNMDb/tsh.c
 LINKING
 0 warning(s) found while compiling
 0 error(s) found while compiling
@@ -23,20 +23,7 @@ test05: PASS
 test06: PASS
 test07: PASS
 test08: PASS
-test09: FAILED
-Input:
-echo start
-./myspin 10
-SLEEP 2
-INT
-echo end 
-exit
--- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
-start										start
-end									      <
-
-									      >	end
-------------------------------------------------------------------------------------------------------------------------------------------------------------
+test09: PASS
 test10: PASS
 test11: FAILED
 Input:
@@ -112,43 +99,8 @@ exit
 hello1									      <
 hello2									      <
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
-test15: FAILED
-Input:
-ls test.5
-SLEEP 1
-INT
-pwd
-exit
--- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
-test.5										test.5
-/tmp/cs343.tests.BuZNzh							      <
-
-									      >	/tmp/cs343.tests.BuZNzh
-------------------------------------------------------------------------------------------------------------------------------------------------------------
-test16: FAILED
-Input:
-SLEEP 1
-TSTP
-SLEEP 1
-TSTP
-SLEEP 1
-ls test.4
-SLEEP 1
-INT
-SLEEP 1
-TSTP
-SLEEP 1
-INT
-SLEEP 1
-ls -l test.5
-exit
--- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
-test.4										test.4
--rw-r--r--  1 Yu  wheel  47 Oct  3 17:34 test.5				      <
-
-
-									      >	-rw-r--r--  1 Yu  wheel  47 Oct  3 17:34 test.5
-------------------------------------------------------------------------------------------------------------------------------------------------------------
+test15: PASS
+test16: PASS
 test17: FAILED
 Input:
 bash -c "sleep 3; echo hello1;"
@@ -180,7 +132,7 @@ hello4									      <
 test18: PASS
 
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-12 basic test cases passed
+15 basic test cases passed
 
 RUN EXTRA CREDIT TEST CASES
 test29: FAILED
@@ -228,24 +180,37 @@ ls -l | grep 2
 ls -l | wc -l
 exit
 -- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
--rw-r--r--  1 Yu  wheel     43 Oct  3 17:34 test.20			      <
--rw-r--r--  1 Yu  wheel     25 Oct  3 17:34 test.200			      <
--rw-r--r--  1 Yu  wheel     24 Oct  3 17:34 test.23			      <
--rw-r--r--  1 Yu  wheel     23 Oct  3 17:34 test.3			      <
--rw-r--r--  1 Yu  wheel     39 Oct  3 17:34 test.4			      <
--rw-r--r--  1 Yu  wheel     47 Oct  3 17:34 test.5			      <
--rw-r--r--  1 Yu  wheel     32 Oct  3 17:34 test1.txt			      <
+-rw-r--r--  1 Yu  wheel     43 Oct  3 19:52 test.20			      <
+-rw-r--r--  1 Yu  wheel     25 Oct  3 19:52 test.200			      <
+-rw-r--r--  1 Yu  wheel     24 Oct  3 19:52 test.23			      <
+-rw-r--r--  1 Yu  wheel     23 Oct  3 19:52 test.3			      <
+-rw-r--r--  1 Yu  wheel     39 Oct  3 19:52 test.4			      <
+-rw-r--r--  1 Yu  wheel     47 Oct  3 19:52 test.5			      <
+-rw-r--r--  1 Yu  wheel     32 Oct  3 19:52 test1.txt			      <
 total 328								      <
-drwxr-xr-x  3 Yu  wheel    102 Oct  3 17:34 dir21			      <
--rw-r--r--  1 Yu  wheel   6216 Oct  3 17:34 io.o			      <
--rw-r--r--  1 Yu  wheel     43 Oct  3 17:34 test.20			      <
--rw-r--r--  1 Yu  wheel     25 Oct  3 17:34 test.200			      <
--rw-r--r--  1 Yu  wheel     24 Oct  3 17:34 test.23			      <
--rw-r--r--  1 Yu  wheel     23 Oct  3 17:34 test.3			      <
--rw-r--r--  1 Yu  wheel     32 Oct  3 17:34 test1.txt			      <
--rw-r--r--  1 Yu  wheel     15 Oct  3 17:34 text2.txt			      <
--rwxr-xr-x  1 Yu  wheel  22060 Oct  3 17:34 tsh				      <
--rwxr-xr-x  1 Yu  wheel  28020 Oct  3 17:34 tsh-orig.64			      <
+-rw-r--r--  1 Yu  wheel     38 Oct  3 19:52 cat.txtt			      <
+-rw-r--r--  1 Yu  wheel      0 Oct  3 19:52 catdogexit.txt		      <
+drwxr-xr-x  3 Yu  wheel    102 Oct  3 19:52 dir21			      <
+-rw-r--r--  1 Yu  wheel      0 Oct  3 19:52 dogcatexit.exit		      <
+-rw-r--r--  1 Yu  wheel      0 Oct  3 19:52 dogexit.txt			      <
+-rw-r--r--  1 Yu  wheel     15 Oct  3 19:52 dummy			      <
+-rw-r--r--  1 Yu  wheel  11736 Oct  3 19:52 interpreter.o		      <
+-rw-r--r--  1 Yu  wheel   6216 Oct  3 19:52 io.o			      <
+-rw-r--r--  1 Yu  wheel     45 Oct  3 19:52 longlist.txt		      <
+-rwxr-xr-x  1 Yu  wheel   8684 Oct  3 19:52 myspin			      <
+-rw-r--r--  1 Yu  wheel  19848 Oct  3 19:52 runtime.o			      <
+-rwxr-xr-x  1 Yu  wheel   5546 Oct  3 19:52 sdriver.pl			      <
+-rw-r--r--  1 Yu  wheel     43 Oct  3 19:52 test.20			      <
+-rw-r--r--  1 Yu  wheel     25 Oct  3 19:52 test.200			      <
+-rw-r--r--  1 Yu  wheel     24 Oct  3 19:52 test.23			      <
+-rw-r--r--  1 Yu  wheel     23 Oct  3 19:52 test.3			      <
+-rw-r--r--  1 Yu  wheel     39 Oct  3 19:52 test.4			      <
+-rw-r--r--  1 Yu  wheel     47 Oct  3 19:52 test.5			      <
+-rw-r--r--  1 Yu  wheel     32 Oct  3 19:52 test1.txt			      <
+-rw-r--r--  1 Yu  wheel     15 Oct  3 19:52 text2.txt			      <
+-rwxr-xr-x  1 Yu  wheel  22060 Oct  3 19:52 tsh				      <
+-rwxr-xr-x  1 Yu  wheel  28020 Oct  3 19:52 tsh-orig.64			      <
+-rw-r--r--  1 Yu  wheel   5840 Oct  3 19:52 tsh.o			      <
       24								      <
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
 test22: FAILED
@@ -275,19 +240,21 @@ ls -l | grep test | grep 2
 ls -l | grep test | grep 2 | wc
 exit
 -- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
--rw-r--r--  1 Yu  wheel     43 Oct  3 17:34 test.20			      <
--rw-r--r--  1 Yu  wheel     25 Oct  3 17:34 test.200			      <
--rw-r--r--  1 Yu  wheel     24 Oct  3 17:34 test.23			      <
--rw-r--r--  1 Yu  wheel     23 Oct  3 17:34 test.3			      <
--rw-r--r--  1 Yu  wheel     39 Oct  3 17:34 test.4			      <
--rw-r--r--  1 Yu  wheel     47 Oct  3 17:34 test.5			      <
--rw-r--r--  1 Yu  wheel     32 Oct  3 17:34 test1.txt			      <
--rw-r--r--  1 Yu  wheel     43 Oct  3 17:34 test.20			      <
--rw-r--r--  1 Yu  wheel     25 Oct  3 17:34 test.200			      <
--rw-r--r--  1 Yu  wheel     24 Oct  3 17:34 test.23			      <
--rw-r--r--  1 Yu  wheel     23 Oct  3 17:34 test.3			      <
--rw-r--r--  1 Yu  wheel     32 Oct  3 17:34 test1.txt			      <
-       5      45     262						      <
+-rw-r--r--  1 Yu  wheel     43 Oct  3 19:52 test.20			      <
+-rw-r--r--  1 Yu  wheel     25 Oct  3 19:52 test.200			      <
+-rw-r--r--  1 Yu  wheel     24 Oct  3 19:52 test.23			      <
+-rw-r--r--  1 Yu  wheel     23 Oct  3 19:52 test.3			      <
+-rw-r--r--  1 Yu  wheel     39 Oct  3 19:52 test.4			      <
+-rw-r--r--  1 Yu  wheel     47 Oct  3 19:52 test.5			      <
+-rw-r--r--  1 Yu  wheel     32 Oct  3 19:52 test1.txt			      <
+-rw-r--r--  1 Yu  wheel     43 Oct  3 19:52 test.20			      <
+-rw-r--r--  1 Yu  wheel     25 Oct  3 19:52 test.200			      <
+-rw-r--r--  1 Yu  wheel     24 Oct  3 19:52 test.23			      <
+-rw-r--r--  1 Yu  wheel     23 Oct  3 19:52 test.3			      <
+-rw-r--r--  1 Yu  wheel     39 Oct  3 19:52 test.4			      <
+-rw-r--r--  1 Yu  wheel     47 Oct  3 19:52 test.5			      <
+-rw-r--r--  1 Yu  wheel     32 Oct  3 19:52 test1.txt			      <
+       7      63     364						      <
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
 test31: FAILED
 Input:
@@ -298,19 +265,19 @@ ls < cur.dir.test.txt
 exit
 -- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
       24     209    1592						      |	total 0
-									      >	drwxrwxrwt  23 root        wheel   782 Oct  3 17:34 .
+									      >	drwxrwxrwt  23 root        wheel   782 Oct  3 19:52 .
 									      >	drwxr-xr-x@  6 root        wheel   204 Oct 31  2013 ..
 									      >	drwx------   4 Yu          wheel   136 Oct  3 13:45 .vbox-Yu-ipc
 									      >	drwx------  25 Yu          wheel   850 Oct  3 15:54 cs343.tests.20Q9k8
 									      >	drwx------  11 Yu          wheel   374 Oct  3 15:54 cs343.tests.3Ny8cz
-									      >	drwx------  55 Yu          wheel  1870 Oct  3 17:37 cs343.tests.635Tpk
 									      >	drwx------  25 Yu          wheel   850 Oct  3 15:54 cs343.tests.ASCcKK
 									      >	drwx------  25 Yu          wheel   850 Oct  3 17:33 cs343.tests.BqgVdu
-									      >	drwx------  27 Yu          wheel   918 Oct  3 17:37 cs343.tests.BuZNzh
 									      >	drwx------  10 Yu          wheel   340 Oct  3 15:54 cs343.tests.IgTz4u
+									      >	drwx------  55 Yu          wheel  1870 Oct  3 19:55 cs343.tests.IsuWjq
 									      >	drwx------  24 Yu          wheel   816 Oct  3 15:54 cs343.tests.MNzqd1
-									      >	drwx------  14 Yu          wheel   476 Oct  3 17:34 cs343.tests.QM6smq
+									      >	drwx------  14 Yu          wheel   476 Oct  3 19:52 cs343.tests.QZNMDb
 									      >	drwx------  14 Yu          wheel   476 Oct  3 17:33 cs343.tests.S7OWT1
+									      >	drwx------  27 Yu          wheel   918 Oct  3 19:55 cs343.tests.aUz1zS
 									      >	drwx------  14 Yu          wheel   476 Oct  3 15:54 cs343.tests.dUvqP8
 									      >	drwx------  11 Yu          wheel   374 Oct  3 17:34 cs343.tests.i2Dsj3
 									      >	drwx------  14 Yu          wheel   476 Oct  3 15:54 cs343.tests.m5UIsh
@@ -322,7 +289,7 @@ exit
 									      >	drwx------   3 _spotlight  wheel   102 Oct  2 23:26 launchd-415.E4MoJ4
 									      >	drwx------   3 root        wheel   102 Oct  3 11:41 launchd-787.4HBbxQ
 									      >	       0       0       0
-									      >	/tmp/cs343.tests.BuZNzh
+									      >	/tmp/cs343.tests.aUz1zS
 cat.txtt									cat.txtt
 catdogexit.txt									catdogexit.txt
 cur.dir.test.txt								cur.dir.test.txt
@@ -357,8 +324,8 @@ wc < cur.dir.txt > file.test.txt
 cat file.test.txt
 exit
 -- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
-/tmp/cs343.tests.BuZNzh								/tmp/cs343.tests.BuZNzh
-									      >	/tmp/cs343.tests.BuZNzh
+/tmp/cs343.tests.aUz1zS								/tmp/cs343.tests.aUz1zS
+									      >	/tmp/cs343.tests.aUz1zS
 									      >	       0       0       0
        1       1      24							       1       1      24
 ------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -125,15 +125,6 @@ EXTERN void RunCmdRedirOut(commandT*, char*);
 EXTERN void RunCmdRedirIn(commandT*, char*);
 
 /***********************************************************************
- *  Title: Stop the foreground process
- * ---------------------------------------------------------------------
- *    Purpose: Stops the current foreground process if there is any.
- *    Input: void
- *    Output: void
- ***********************************************************************/
-EXTERN void StopFgProc();
-
-/***********************************************************************
  *  Title: Create a command structure 
  * ---------------------------------------------------------------------
  *    Purpose: Creates a command structure.
