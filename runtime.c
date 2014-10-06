@@ -90,6 +90,8 @@ const int builtinNumber = 4;
 static void RunCmdFork(commandT*, bool);
 /* runs an external program command after some checks */
 static void RunExternalCmd(commandT*, bool);
+/* run command with both in and out redirection */
+static void RunCmdRedirInOut(commandT*, char*, char*);
 /* resolves the path and checks for exutable flag */
 static bool ResolveExternalCmd(commandT*);
 /* forks and runs a external program */
@@ -119,9 +121,23 @@ void RunCmd(commandT** cmd, int n)
   int i;
   total_task = n;
 
-  if(n == 1)
-    RunCmdFork(cmd[0], TRUE);
-  else{
+  if (n == 1) {
+    if (cmd[0]->is_redirect_in) {
+      if (cmd[0]->is_redirect_out) {
+        RunCmdRedirInOut(cmd[0], cmd[0]->redirect_in, cmd[0]->redirect_out);
+      }
+      else {
+        RunCmdRedirIn(cmd[0], cmd[0]->redirect_in);
+      }
+    }
+    else if (cmd[0]->is_redirect_out) {
+      RunCmdRedirOut(cmd[0], cmd[0]->redirect_out);
+    }
+    else {
+      RunCmdFork(cmd[0], TRUE);
+    }
+  }
+  else {
     RunCmdPipe(cmd[0], cmd[1]);
     for(i = 0; i < n; i++)
       ReleaseCmdT(&cmd[i]);
@@ -130,9 +146,9 @@ void RunCmd(commandT** cmd, int n)
 
 void RunCmdFork(commandT* cmd, bool fork)
 {
-
   if (cmd->argc<=0)
     return;
+
   if (IsBuiltIn(cmd->argv[0]))
   { 
     RunBuiltInCmd(cmd);
@@ -184,12 +200,48 @@ void RunCmdPipe(commandT* cmd1, commandT* cmd2)
 {
 }
 
+void RunCmdRedirInOut(commandT* cmd, char* inFile, char* outFile)
+{
+  int fidOut = open(outFile, O_WRONLY | O_CREAT, 0644);
+  int fidIn = open(inFile, O_RDONLY);
+
+  int origStdout = dup(1);
+  int origStdin = dup(0);
+
+  dup2(fidOut, 1);
+  dup2(fidIn, 0);
+
+  RunCmdFork(cmd, TRUE);
+
+  dup2(origStdout, 1);
+  dup2(origStdin, 0);
+
+  close(origStdout);
+  close(origStdin);
+}
+
 void RunCmdRedirOut(commandT* cmd, char* file)
 {
+  int fid = open(file, O_WRONLY | O_CREAT, 0644);
+  int origStdout = dup(1);
+  dup2(fid, 1);
+
+  RunCmdFork(cmd, TRUE);
+
+  dup2(origStdout, 1);
+  close(origStdout);
 }
 
 void RunCmdRedirIn(commandT* cmd, char* file)
 {
+  int fid = open(file, O_RDONLY);
+  int origStdin = dup(0);
+  dup2(fid, 0);
+
+  RunCmdFork(cmd, TRUE);
+
+  dup2(origStdin, 0);
+  close(origStdin);
 }
 
 /*Find the executable based on search list provided by environment variable PATH*/
