@@ -56,7 +56,9 @@ char* single_param(char *st)
       if(st[idx] == '<' || st[idx] == '>') {st[idx] = '\0'; return t;}
       if(st[idx] == ' ' && quot1 == 0 && quot2 == 0) {st[idx] = '\0';return t;}
       if(st[idx] == '\'' && quot1 == 1) {st[idx] = '\0';return t;}
+      if(st[idx] == '\'' && quot1 == 0) {quot1 = 1;}
       if(st[idx] == '"' && quot2 == 1) {st[idx] = '\0';return t;}
+      if(st[idx] == '"' && quot2 == 0) {quot2 = 1;}
     }
     else{
       if(st[idx] == ' ' || st[idx] =='\0');
