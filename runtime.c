@@ -165,22 +165,16 @@ void RunCmdFork(commandT* cmd, bool fork)
   //judge alias or not
   commandT* newCmd;
   if(strcmp(cmd -> cmdline, "unalias") == 0) {
-    printf("The command is %s\n", cmd -> cmdline);
     newCmd = cmd;
   }
   else {
-    printf("before parse\n");
     newCmd = parseAliases(cmd);
-    //newCmd = cmd;
-    printf("after parse and argv[0] = %s\n", newCmd -> argv[0]);
 
   }
-  //newCmd = cmd;
   if (newCmd -> argc <= 0)
     return;
   if (IsBuiltIn(newCmd -> argv[0]))
   { 
-    printf("in builtin\n");
     RunBuiltInCmd(newCmd);
   }
   else
@@ -191,8 +185,6 @@ void RunCmdFork(commandT* cmd, bool fork)
 
 commandT* parseAliases(commandT* cmd) {
     //allocate 100 char mem;
-    printf("in the parse func!\n");
-    
     commandT* newCmd = malloc(sizeof(commandT) + sizeof(char *)* 100);
     int i = 0;
     int newArgCount = 0;
@@ -200,7 +192,6 @@ commandT* parseAliases(commandT* cmd) {
 
     for(i = 0; i < cmd -> argc; i++)
     {
-        printf("in the all args copy for loop\n");
         char* currentArg = cmd->argv[i];
         if(strchr(currentArg, ' '))
           inputQuoted = TRUE;
@@ -217,40 +208,36 @@ commandT* parseAliases(commandT* cmd) {
             //divide the alias command and args string into command and args
             if(((currentChar == ' ' || currentChar == 0) && !inputQuoted) || (inputQuoted && currentChar == 0))
             {
-                printf("in the if func%d\n", j);
-                // an arg ends, we emtpy the tmp container
-                tmp[tmpLength] = 0;    
-                //tmpLength = 0;            
-                printf("tmpLength: %d\n", tmpLength); //garbage line?
-
+                // an arg ends, we empty the tmp container
                 char* newArg = malloc(sizeof(char) * (tmpLength + 1));
-                tmpLength = 0;    
-                printf("tmp: %s\n", tmp); //garbage line?
+
+                tmp[tmpLength] = 0;    
                 strcpy(newArg, tmp);
-                printf("new arg: %s\n", newArg); //garbage line?
-                newCmd->argv[newArgCount] = tmp;
-                printf("new argv: %s\n", newCmd->argv[newArgCount]);
+                newCmd->argv[newArgCount] = strdup(newArg);
+
                 newArgCount++;
+
                 tmp = realloc(tmp, sizeof(char) * MAXLINE);
+                tmpLength = 0;    
+
+                free(newArg);
             }         
             else
             {
-                printf("in the else func%d\n", j);
-                tmp[tmpLength] = currentChar;
-                tmpLength++;
+              tmp[tmpLength] = currentChar;
+              tmpLength++;
             }
         }
-        printf("for loop succeed!\n");
         inputQuoted = FALSE;
         free(tmp);
         //free(currentArg); freeCommand will handle this after this func returns
     }
-    printf("for loop succeed!\n");
-    newCmd->name = newCmd->argv[0];
+    newCmd->name = strdup(newCmd->argv[0]);
+    newCmd->cmdline = strdup(cmd->cmdline);
+    newCmd->bg = cmd->bg;
     newCmd->argc = newArgCount;
-    newCmd->argv[newCmd->argc] = 0;
     freeCommand(cmd);
-    printf("parse succeed!\n");
+
     return newCmd;
     
 }
@@ -333,10 +320,13 @@ void makeAlias(commandT* cmd)
 {
     char *lhs = malloc(sizeof(char) * MAXLINE);
     int lhs_size = 0;
+
     char *rhs = malloc(sizeof(char) * MAXLINE);
     int rhs_size = 0;
-    int i = 0;
+
     bool left = TRUE;
+    int i;
+
     for(i = 0; i <= strlen(cmd -> argv[1]); i++)
     {
         char cur_char = cmd -> argv[1][i];
@@ -355,13 +345,17 @@ void makeAlias(commandT* cmd)
             rhs[rhs_size] = cur_char;
             rhs_size++;
         }
-        else if(!left && cur_char == '\'')
+        else if (!left && cur_char == '\'') {
             rhs[rhs_size] = 0;
+        }
     }
     aliasT *alias = malloc(sizeof(alias));
-    alias -> lhs = lhs;
-    alias -> rhs = rhs;
+    alias -> lhs = strdup(lhs);
+    alias -> rhs = strdup(rhs);
     push_alias(alias);
+
+    free(lhs);
+    free(rhs);
 }
 
 void push_alias(aliasT* alias)
@@ -411,9 +405,7 @@ void removeAlias(char *name)
 static void RunExternalCmd(commandT* cmd, bool fork)
 {
   //the resolve external command add the command path to the cmd->name attribute
-  printf("in RunExternalCmd!\n");
   if (ResolveExternalCmd(cmd)){
-    printf("in ResolveExternalCmd!\n");
     Exec(cmd, fork);
   }
   else {
@@ -536,7 +528,6 @@ static bool IsBuiltIn(char* cmd)
 
 static void Exec(commandT* cmd, bool forceFork)
 {  
-  printf("in Exec!\n");
   //process divided into two, one is praent process with child_pid equal child's process id
   // one is child process with child_pid equals to 0
   int pid;
@@ -547,38 +538,31 @@ static void Exec(commandT* cmd, bool forceFork)
   // block sigchld signals until recording the new process id,
   // and then fork the foreground process
   sigprocmask(SIG_BLOCK, &mask, NULL);
-    pid = fork();
+  pid = fork();
 
-    /* This is run by the child. execute the command */
-    if(pid == 0) {
-      printf("in child pid!\n");
-      //group the processs 
-      setpgid(0,0);
-      //Usage : int execv(const char *path, char *const argv[]); 
-      execv(cmd->name, cmd->argv);
-      printf("execv succeed!\n");
+  /* This is run by the child. execute the command */
+  if (pid == 0) {
+    //group the processs 
+    setpgid(0, 0);
+    //Usage : int execv(const char *path, char *const argv[]); 
+    execv(cmd->name, cmd->argv);
+  }
+
+  /* This is run by the parent. */
+  else {
+    //HandleJobs(child_pid);
+    if(cmd->bg){
+      addJobList(pid, cmd->cmdline, TRUE);
+      sigprocmask(SIG_UNBLOCK, &mask, NULL);
     }
-
-    /* This is run by the parent. */
     else {
-      printf("in mother pid!\n");
-      //HandleJobs(child_pid);
-      if(cmd->bg){
-        addJobList(pid, cmd->cmdline, TRUE);
-        sigprocmask(SIG_UNBLOCK, &mask, NULL);
-      }
-      else {
-        printf("run on fg!\n");
-        fgpid = pid;
-        // printf("pid in foreground%d\n",pid );
-        //FIXME the fg job also add to the list, with the "isbg" parameter set to FALSE
-        addJobList(pid, cmd->cmdline, FALSE);
-        printf("add job done!\n");
+      fgpid = pid;
+      //FIXME the fg job also add to the list, with the "isbg" parameter set to FALSE
+      addJobList(pid, cmd->cmdline, FALSE);
 
-        sigprocmask(SIG_UNBLOCK, &mask, NULL);
+      sigprocmask(SIG_UNBLOCK, &mask, NULL);
 
-        waitfg(pid);
-        printf("fg done!\n");
+      waitfg(pid);
     }
   }
 }
@@ -605,7 +589,6 @@ bgjobL * getLastJob(){
 
 //add the new job to the end of the list
 static void addJobList(pid_t pid, char *cmd, bool isbg){
-  printf("addJobList now\n");
   bgjobL *lastbgjob = getLastJob();
   bgjobL *newjob = (bgjobL *)malloc(sizeof(bgjobL));
   newjob->next = NULL;
@@ -622,18 +605,14 @@ static void addJobList(pid_t pid, char *cmd, bool isbg){
   newjob->pid = pid;
   newjob->state = RUNNING; //assume the job is still running
   newjob->jobid = count + 1;
-  printf("allocate mem now\n");
 
   newjob->cmdline = (char *)malloc(sizeof(char) * (MAXLINE));
-  printf("mem allocate OK\n");
   strcpy(newjob->cmdline, cmd);
-  printf("strcpy OK\n");
 
   if (isbg)
     newjob->bg = 1;
   else
     newjob->bg = 0;
-  //return newjob;
 }
 
 static void ShowJobs() {
