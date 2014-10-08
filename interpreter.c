@@ -48,22 +48,40 @@ char* single_param(char *st)
   int quot1 = 0,quot2 = 0, start = 0;
   char *t = st;
   static int idx;
-
+  bool firstletterisQuot = 0;
   idx = 0;
   while(1){
     if(start == 1){
       if(st[idx] == '\0') return t;
       if(st[idx] == '<' || st[idx] == '>') {st[idx] = '\0'; return t;}
       if(st[idx] == ' ' && quot1 == 0 && quot2 == 0) {st[idx] = '\0';return t;}
-      if(st[idx] == '\'' && quot1 == 1) {st[idx] = '\0';return t;}
+      if(st[idx] == '\'' && quot1 == 1) {
+        if(firstletterisQuot == 1){
+          st[idx] = '\0';
+          return t;
+        }
+        else {
+          st[idx+1] = '\0';
+          return t;
+        }
+      }        
       if(st[idx] == '\'' && quot1 == 0) {quot1 = 1;}
-      if(st[idx] == '"' && quot2 == 1) {st[idx] = '\0';return t;}
+      if(st[idx] == '"' && quot2 == 1) {
+        if (firstletterisQuot == 1) {
+          st[idx] = '\0'; 
+        return t;
+        }
+        else{
+          st[idx+1] = '\0';
+          return t;
+        }
+      }
       if(st[idx] == '"' && quot2 == 0) {quot2 = 1;}
     }
     else{
       if(st[idx] == ' ' || st[idx] =='\0');
-      else if(st[idx] == '"') {quot2 = 1; start = 1; t = &(st[idx+1]);}
-      else if(st[idx] == '\'') {quot1 = 1; start = 1; t = &(st[idx+1]);}
+      else if(st[idx] == '"') {quot2 = 1; start = 1; t = &(st[idx+1]); firstletterisQuot = 1;}
+      else if(st[idx] == '\'') {quot1 = 1; start = 1; t = &(st[idx+1]); firstletterisQuot = 1;}
       else {start = 1; t = &(st[idx]);}
     }
     idx++;

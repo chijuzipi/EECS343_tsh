@@ -163,6 +163,7 @@ void RunCmdFork(commandT* cmd, bool fork)
 {
   //printf("The command is %s\n", cmd -> cmdline);
   //judge alias or not
+  printf("cmd is %s\n", cmd->argv[1]);
   commandT* newCmd;
   if(strcmp(cmd -> cmdline, "unalias") == 0) {
     newCmd = cmd;
@@ -318,9 +319,10 @@ void printAliases(void)
 
 void makeAlias(commandT* cmd)
 {
+    char *rhs = malloc(sizeof(char) * MAXLINE);
     char *lhs = malloc(sizeof(char) * MAXLINE);
     int lhs_size = 0;
-
+    printf("argv[1] = %s\n", cmd->argv[1]);
     char *rhs = malloc(sizeof(char) * MAXLINE);
     int rhs_size = 0;
 
@@ -351,6 +353,7 @@ void makeAlias(commandT* cmd)
     }
     aliasT *alias = malloc(sizeof(alias));
     alias -> lhs = strdup(lhs);
+    printf("alias left = %s\n", alias -> lhs);
     alias -> rhs = strdup(rhs);
     push_alias(alias);
 
@@ -360,6 +363,7 @@ void makeAlias(commandT* cmd)
 
 void push_alias(aliasT* alias)
 {
+    printf("push alias now,left = %s\n", alias->lhs);
     aliasT *prev = NULL;
     aliasT *top = aliases;
     //if the alias string is already existed in list, overwrite it
@@ -370,10 +374,14 @@ void push_alias(aliasT* alias)
     }
     if(prev)
       prev -> next = alias; 
-    else
+    else{
       aliases = alias;
-
+      printf("else now! left = %s\n", aliases->lhs);
+    }
+      //aliases = alias;
     alias -> next = top;
+    printf("finish pushing! left = %s\n", aliases->lhs);
+    printf("finish pushing! right = %s\n", aliases->rhs);
 }
 
 void removeAlias(char *name)
