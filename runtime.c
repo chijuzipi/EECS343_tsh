@@ -372,13 +372,14 @@ void push_alias(aliasT* alias)
       top = top -> next;
     }
     if(prev)
-      prev -> next = alias; 
+      prev -> next = alias;
     else{
       aliases = alias;
       printf("else now! left = %s\n", aliases->lhs);
     }
       //aliases = alias;
-    alias -> next = top;
+    alias -> next = top->next;
+    free(top);
     printf("finish pushing! left = %s\n", aliases->lhs);
     printf("finish pushing! right = %s\n", aliases->rhs);
 }
