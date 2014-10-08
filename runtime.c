@@ -319,7 +319,6 @@ void printAliases(void)
 
 void makeAlias(commandT* cmd)
 {
-    char *rhs = malloc(sizeof(char) * MAXLINE);
     char *lhs = malloc(sizeof(char) * MAXLINE);
     int lhs_size = 0;
     printf("argv[1] = %s\n", cmd->argv[1]);
