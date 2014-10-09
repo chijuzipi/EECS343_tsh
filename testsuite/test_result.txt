@@ -1,0 +1,234 @@
+Using reference shell 64
+Testing Yu-20141006225846-tsh.tar.gz
+
+UNTAR
+
+COMPILE
+compile /tmp/cs343.tests.mvoy1E/interpreter.c
+compile /tmp/cs343.tests.mvoy1E/io.c
+compile /tmp/cs343.tests.mvoy1E/runtime.c
+compile /tmp/cs343.tests.mvoy1E/tsh.c
+LINKING
+0 warning(s) found while compiling
+0 error(s) found while compiling
+
+RUN BASIC TEST CASES
+test33: PASS
+test34: PASS
+test01: PASS
+test02: PASS
+test03: PASS
+test04: PASS
+test05: PASS
+test06: PASS
+test07: PASS
+test08: PASS
+test09: PASS
+test10: PASS
+test11: PASS
+test12: PASS
+test13: PASS
+test14: PASS
+test15: PASS
+test16: PASS
+test17: PASS
+test18: PASS
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+20 basic test cases passed
+
+RUN EXTRA CREDIT TEST CASES
+test24: PASS
+test25: PASS
+test31: PASS
+test32: PASS
+test26: FAILED
+Input:
+alias showdir='echo ls'
+showdir
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+ls									      |	showdir: command not found
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test27: FAILED
+Input:
+alias showdir='echo ls'
+showdir
+unalias showdir
+showdir
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+ls									      |	showdir: command not found
+/bin/bash: line 6: showdir: command not found				      |	/bin/bash: line 3: unalias: showdir: not found
+									      >	showdir: command not found
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test28: PASS
+test29: FAILED
+Input:
+alias showdir='ls'
+alias foo='ls -lh'
+alias test='whoami'
+alias
+unalias showdir
+unalias foo
+unalias test
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+alias foo='ls -lh'							      |	alias BÀÑã='GÀÑã'
+alias showdir='ls'							      |	alias foo='ls'
+alias test='whoami'								alias test='whoami'
+									      >	/bin/bash: line 3: unalias: showdir: not found
+									      >	/bin/bash: line 3: unalias: ls: not found
+									      >	/bin/bash: line 3: unalias: whoami: not found
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test30: FAILED
+Input:
+alias showdir='ls '
+alias home='~/'
+showdir home
+unalias showdir
+unalias home
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+Applications								      |	showdir: command not found
+Desktop									      |	/bin/bash: line 3: unalias: showdir: not found
+Documents								      |	/bin/bash: line 3: unalias: ~/: not found
+Downloads								      <
+Dropbox									      <
+Library									      <
+Movies									      <
+Music									      <
+Pictures								      <
+Public									      <
+VirtualBox VMs								      <
+algs4									      <
+tmp									      <
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test19: FAILED
+Input:
+ls -l | wc
+cat test.20 | wc
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+      30     263    1584						      <
+       3       8      43						      <
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test20: FAILED
+Input:
+ls -l | grep test
+ls -l | grep 2
+ls -l | wc -l
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+-rw-r--r--  1 Yu  wheel     24 Oct  6 23:04 cur.dir.test.txt		      <
+-rw-r--r--  1 Yu  wheel    675 Oct  6 23:04 dir.test.txt		      <
+-rw-r--r--  1 Yu  wheel     25 Oct  6 23:04 file.test.txt		      <
+-rw-r--r--  1 Yu  wheel    131 Oct  6 23:04 file1.test.txt		      <
+-rw-r--r--  1 Yu  wheel     25 Oct  6 23:04 file2.test.txt		      <
+-rw-r--r--  1 Yu  wheel     43 Oct  6 23:01 test.20			      <
+-rw-r--r--  1 Yu  wheel     25 Oct  6 23:01 test.200			      <
+-rw-r--r--  1 Yu  wheel     24 Oct  6 23:01 test.23			      <
+-rw-r--r--  1 Yu  wheel     23 Oct  6 23:01 test.3			      <
+-rw-r--r--  1 Yu  wheel     39 Oct  6 23:01 test.4			      <
+-rw-r--r--  1 Yu  wheel     47 Oct  6 23:01 test.5			      <
+-rw-r--r--  1 Yu  wheel     32 Oct  6 23:01 test1.txt			      <
+-rw-r--r--  1 Yu  wheel     38 Oct  6 23:01 cat.txtt			      <
+-rw-r--r--  1 Yu  wheel      0 Oct  6 23:01 catdogexit.txt		      <
+-rw-r--r--  1 Yu  wheel     24 Oct  6 23:04 cur.dir.test.txt		      <
+-rw-r--r--  1 Yu  wheel     24 Oct  6 23:04 cur.dir.txt			      <
+-rw-r--r--  1 Yu  wheel    675 Oct  6 23:04 dir.test.txt		      <
+drwxr-xr-x  3 Yu  wheel    102 Oct  6 23:01 dir21			      <
+-rw-r--r--  1 Yu  wheel      0 Oct  6 23:01 dogcatexit.exit		      <
+-rw-r--r--  1 Yu  wheel      0 Oct  6 23:01 dogexit.txt			      <
+-rw-r--r--  1 Yu  wheel     15 Oct  6 23:01 dummy			      <
+-rw-r--r--  1 Yu  wheel     25 Oct  6 23:04 file.test.txt		      <
+-rw-r--r--  1 Yu  wheel    131 Oct  6 23:04 file1.test.txt		      <
+-rw-r--r--  1 Yu  wheel     25 Oct  6 23:04 file2.test.txt		      <
+-rw-r--r--  1 Yu  wheel  11736 Oct  6 23:01 interpreter.o		      <
+-rw-r--r--  1 Yu  wheel   6216 Oct  6 23:01 io.o			      <
+-rw-r--r--  1 Yu  wheel    193 Oct  6 23:04 longlist.txt		      <
+-rwxr-xr-x  1 Yu  wheel   8684 Oct  6 23:01 myspin			      <
+-rw-r--r--  1 Yu  wheel  33972 Oct  6 23:01 runtime.o			      <
+-rwxr-xr-x  1 Yu  wheel   5546 Oct  6 23:01 sdriver.pl			      <
+-rw-r--r--  1 Yu  wheel     43 Oct  6 23:01 test.20			      <
+-rw-r--r--  1 Yu  wheel     25 Oct  6 23:01 test.200			      <
+-rw-r--r--  1 Yu  wheel     24 Oct  6 23:01 test.23			      <
+-rw-r--r--  1 Yu  wheel     23 Oct  6 23:01 test.3			      <
+-rw-r--r--  1 Yu  wheel     39 Oct  6 23:01 test.4			      <
+-rw-r--r--  1 Yu  wheel     47 Oct  6 23:01 test.5			      <
+-rw-r--r--  1 Yu  wheel     32 Oct  6 23:01 test1.txt			      <
+-rw-r--r--  1 Yu  wheel     15 Oct  6 23:01 text2.txt			      <
+-rwxr-xr-x  1 Yu  wheel  23324 Oct  6 23:01 tsh				      <
+-rwxr-xr-x  1 Yu  wheel  28020 Oct  6 23:01 tsh-orig.64			      <
+-rw-r--r--  1 Yu  wheel   5840 Oct  6 23:01 tsh.o			      <
+      30								      <
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test21: FAILED
+Input:
+ls -l | wc
+cat test.20 | wc
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+      30     263    1584						      <
+       3       8      43						      <
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test22: FAILED
+Input:
+ls -l test.3 test.4 test.5 test.23 | wc -w
+grep test longlist.txt
+cat longlist.txt
+grep 3 longlist.txt | wc -w | cat | wc
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+      36								      <
+-rw-r--r--  1 Yu  wheel  24 Oct  6 23:01 test.23				-rw-r--r--  1 Yu  wheel  24 Oct  6 23:01 test.23
+-rw-r--r--  1 Yu  wheel  23 Oct  6 23:01 test.3					-rw-r--r--  1 Yu  wheel  23 Oct  6 23:01 test.3
+-rw-r--r--  1 Yu  wheel  39 Oct  6 23:01 test.4					-rw-r--r--  1 Yu  wheel  39 Oct  6 23:01 test.4
+-rw-r--r--  1 Yu  wheel  47 Oct  6 23:01 test.5					-rw-r--r--  1 Yu  wheel  47 Oct  6 23:01 test.5
+-rw-r--r--  1 Yu  wheel  24 Oct  6 23:01 test.23				-rw-r--r--  1 Yu  wheel  24 Oct  6 23:01 test.23
+-rw-r--r--  1 Yu  wheel  23 Oct  6 23:01 test.3					-rw-r--r--  1 Yu  wheel  23 Oct  6 23:01 test.3
+-rw-r--r--  1 Yu  wheel  39 Oct  6 23:01 test.4					-rw-r--r--  1 Yu  wheel  39 Oct  6 23:01 test.4
+-rw-r--r--  1 Yu  wheel  47 Oct  6 23:01 test.5					-rw-r--r--  1 Yu  wheel  47 Oct  6 23:01 test.5
+       1       1       9						      <
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+test23: FAILED
+Input:
+ls -l | grep test
+ls -l | grep test | grep 2
+ls -l | grep test | grep 2 | wc
+exit
+-- HOW IT SHOULD BE ------------------------------------------------------------ YOUR PROGRAM --------------------------------------------------------------
+-rw-r--r--  1 Yu  wheel     24 Oct  6 23:04 cur.dir.test.txt		      <
+-rw-r--r--  1 Yu  wheel    675 Oct  6 23:04 dir.test.txt		      <
+-rw-r--r--  1 Yu  wheel     25 Oct  6 23:04 file.test.txt		      <
+-rw-r--r--  1 Yu  wheel    131 Oct  6 23:04 file1.test.txt		      <
+-rw-r--r--  1 Yu  wheel     25 Oct  6 23:04 file2.test.txt		      <
+-rw-r--r--  1 Yu  wheel     43 Oct  6 23:01 test.20			      <
+-rw-r--r--  1 Yu  wheel     25 Oct  6 23:01 test.200			      <
+-rw-r--r--  1 Yu  wheel     24 Oct  6 23:01 test.23			      <
+-rw-r--r--  1 Yu  wheel     23 Oct  6 23:01 test.3			      <
+-rw-r--r--  1 Yu  wheel     39 Oct  6 23:01 test.4			      <
+-rw-r--r--  1 Yu  wheel     47 Oct  6 23:01 test.5			      <
+-rw-r--r--  1 Yu  wheel     32 Oct  6 23:01 test1.txt			      <
+-rw-r--r--  1 Yu  wheel     24 Oct  6 23:04 cur.dir.test.txt		      <
+-rw-r--r--  1 Yu  wheel    675 Oct  6 23:04 dir.test.txt		      <
+-rw-r--r--  1 Yu  wheel     25 Oct  6 23:04 file.test.txt		      <
+-rw-r--r--  1 Yu  wheel    131 Oct  6 23:04 file1.test.txt		      <
+-rw-r--r--  1 Yu  wheel     25 Oct  6 23:04 file2.test.txt		      <
+-rw-r--r--  1 Yu  wheel     43 Oct  6 23:01 test.20			      <
+-rw-r--r--  1 Yu  wheel     25 Oct  6 23:01 test.200			      <
+-rw-r--r--  1 Yu  wheel     24 Oct  6 23:01 test.23			      <
+-rw-r--r--  1 Yu  wheel     23 Oct  6 23:01 test.3			      <
+-rw-r--r--  1 Yu  wheel     39 Oct  6 23:01 test.4			      <
+-rw-r--r--  1 Yu  wheel     47 Oct  6 23:01 test.5			      <
+-rw-r--r--  1 Yu  wheel     32 Oct  6 23:01 test1.txt			      <
+      12     108     658						      <
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+5 extra credit test cases passed
+
+CHECK FOR MEMORY LEAKS
+0 possible leaks
+0 leaks
+0 still reachable

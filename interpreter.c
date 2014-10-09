@@ -103,6 +103,7 @@ char * translatePath(char * c) {
 	printf("path is %s\n", path);
 	return path;    
 	}
+  else return NULL;
 }
 /*Parse the single command and call single_param to parse each word in the command*/
 //parser_single(&(cmdLine[i-j]), j, &(command[task]),bg);
