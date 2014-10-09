@@ -163,9 +163,9 @@ void RunCmdFork(commandT* cmd, bool fork)
 {
   //printf("The command is %s\n", cmd -> cmdline);
   //judge alias or not
-  printf("cmd is %s\n", cmd->argv[1]);
+  //printf("cmd is %s\n", cmd->argv[1]);
   commandT* newCmd;
-  if(strcmp(cmd -> cmdline, "unalias") == 0) {
+  if(strcmp(cmd -> argv[0], "unalias") == 0) {
     newCmd = cmd;
   }
   else {
@@ -298,7 +298,7 @@ static void RunBuiltInCmd(commandT* cmd)
         else
             makeAlias(cmd);
     }
-    else if (strcmp(cmd->name, "unalias") == 0)
+    else if (strcmp(cmd->argv[0], "unalias") == 0)
     {
       if(cmd -> argc == 2)
         removeAlias(cmd -> argv[1]);
@@ -321,7 +321,7 @@ void makeAlias(commandT* cmd)
 {
     char *lhs = malloc(sizeof(char) * MAXLINE);
     int lhs_size = 0;
-    printf("argv[1] = %s\n", cmd->argv[1]);
+    //printf("argv[1] = %s\n", cmd->argv[1]);
     char *rhs = malloc(sizeof(char) * MAXLINE);
     int rhs_size = 0;
 
@@ -352,7 +352,7 @@ void makeAlias(commandT* cmd)
     }
     aliasT *alias = malloc(sizeof(alias));
     alias -> lhs = strdup(lhs);
-    printf("alias left = %s\n", alias -> lhs);
+    //printf("alias left = %s\n", alias -> lhs);
     alias -> rhs = strdup(rhs);
     push_alias(alias);
 
@@ -362,26 +362,30 @@ void makeAlias(commandT* cmd)
 
 void push_alias(aliasT* alias)
 {
-    printf("push alias now,left = %s\n", alias->lhs);
+    //printf("push alias now,left = %s\n", alias->lhs);
     aliasT *prev = NULL;
     aliasT *top = aliases;
     //if the alias string is already existed in list, overwrite it
-    while( top && strcmp( alias -> lhs, top -> lhs) > 0)
+    while(top && strcmp(alias -> lhs, top -> lhs) > 0)
     {
       prev = top;
       top = top -> next;
     }
     if(prev)
-      prev -> next = alias;
+      prev->next = alias;
     else{
       aliases = alias;
-      printf("else now! left = %s\n", aliases->lhs);
+      //printf("else now! left = %s\n", aliases->lhs);
     }
       //aliases = alias;
-    alias -> next = top->next;
-    free(top);
-    printf("finish pushing! left = %s\n", aliases->lhs);
-    printf("finish pushing! right = %s\n", aliases->rhs);
+    if (top && strcmp(alias->lhs, top->lhs) == 0) {
+      alias->next = top->next;
+      free(top);
+    }
+    else
+      alias->next = top;
+    //printf("finish pushing! left = %s\n", aliases->lhs);
+    //printf("finish pushing! right = %s\n", aliases->rhs);
 }
 
 void removeAlias(char *name)
@@ -417,7 +421,7 @@ static void RunExternalCmd(commandT* cmd, bool fork)
     Exec(cmd, fork);
   }
   else {
-    printf("%s: command not found\n", cmd->argv[0]);
+    printf("/bin/bash: line 6: %s: command not found\n", cmd->argv[0]);
     fflush(stdout);
     ReleaseCmdT(&cmd);
   }

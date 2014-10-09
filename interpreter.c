@@ -88,6 +88,16 @@ char* single_param(char *st)
   }
 }
 
+char * translatePath(char * c) {
+    if (c[0] == '~') {
+	char *left = getenv("HOME");
+	char *right = c[1];
+	char *path =strcat(left, right);
+	
+	printf("path is %s\n", path);
+	return path;    
+	}
+}
 /*Parse the single command and call single_param to parse each word in the command*/
 //parser_single(&(cmdLine[i-j]), j, &(command[task]),bg);
 void parser_single(char *c, int sz, commandT** cd, int bg)
