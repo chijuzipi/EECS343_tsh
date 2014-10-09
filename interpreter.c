@@ -89,11 +89,17 @@ char* single_param(char *st)
 }
 
 char * translatePath(char * c) {
-    if (c[0] == '~') {
-	char *left = getenv("HOME");
-	char *right = c[1];
-	char *path =strcat(left, right);
+  if (c[0] == '~') {
+  printf("in translatePath \n");
 	
+  char *left = getenv("HOME");
+  printf("left is %s\n", left);
+
+	char *right = c + 1;
+  printf("right is %s\n", right);
+	
+  char *path = strcat(left, right);
+  //c[strlen(left)] = rigth;
 	printf("path is %s\n", path);
 	return path;    
 	}
@@ -148,17 +154,17 @@ void parser_single(char *c, int sz, commandT** cd, int bg)
   (*cd)->cmdline = strdup(c);
   tmp = c;
   for(i = 0; i < task_argc; i++){
-    (*cd) -> argv[i] = strdup(single_param(tmp));
+    (*cd) -> argv[i] = translatePath(strdup(single_param(tmp)));
     while ((*tmp) != '\0') tmp++;
     tmp ++;
   }
   if(in){
     (*cd) -> is_redirect_in = 1;
-    (*cd) -> redirect_in = strdup(single_param(in));
+    (*cd) -> redirect_in = translatePath(strdup(single_param(in)));
   }
   if(out){
     (*cd) -> is_redirect_out = 1;
-    (*cd) -> redirect_out = strdup(single_param(out));
+    (*cd) -> redirect_out = translatePath(strdup(single_param(out)));
   }
 }
 
