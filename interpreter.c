@@ -90,18 +90,18 @@ char* single_param(char *st)
 
 char * translatePath(char * c) {
   if (c[0] == '~') {
-  printf("in translatePath \n");
+  //printf("in translatePath \n");
 	char * newpath = (char *)malloc(sizeof(char) * (MAXLINE));
 
   char *left = getenv("HOME");
-  printf("left is %s\n", left);
+  //printf("left is %s\n", left);
 
 	char *right = c + 1;
-  printf("right is %s\n", right);
+  //printf("right is %s\n", right);
 	
   newpath = strcat(left, right);
   //c[strlen(left)] = rigth;
-	printf("path is %s\n", newpath);
+	//printf("path is %s\n", newpath);
 	return newpath;    
 	}
   else return c;
