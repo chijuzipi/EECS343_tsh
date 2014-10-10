@@ -91,19 +91,20 @@ char* single_param(char *st)
 char * translatePath(char * c) {
   if (c[0] == '~') {
   printf("in translatePath \n");
-	
+	char * newpath = (char *)malloc(sizeof(char) * (MAXLINE));
+
   char *left = getenv("HOME");
   printf("left is %s\n", left);
 
 	char *right = c + 1;
   printf("right is %s\n", right);
 	
-  char *path = strcat(left, right);
+  newpath = strcat(left, right);
   //c[strlen(left)] = rigth;
-	printf("path is %s\n", path);
-	return path;    
+	printf("path is %s\n", newpath);
+	return newpath;    
 	}
-  else return NULL;
+  else return c;
 }
 /*Parse the single command and call single_param to parse each word in the command*/
 //parser_single(&(cmdLine[i-j]), j, &(command[task]),bg);
@@ -155,17 +156,17 @@ void parser_single(char *c, int sz, commandT** cd, int bg)
   (*cd)->cmdline = strdup(c);
   tmp = c;
   for(i = 0; i < task_argc; i++){
-    (*cd) -> argv[i] = translatePath(strdup(single_param(tmp)));
+    (*cd) -> argv[i] = strdup(translatePath(strdup(single_param(tmp))));
     while ((*tmp) != '\0') tmp++;
     tmp ++;
   }
   if(in){
     (*cd) -> is_redirect_in = 1;
-    (*cd) -> redirect_in = translatePath(strdup(single_param(in)));
+    (*cd) -> redirect_in = strdup(translatePath(strdup(single_param(in))));
   }
   if(out){
     (*cd) -> is_redirect_out = 1;
-    (*cd) -> redirect_out = translatePath(strdup(single_param(out)));
+    (*cd) -> redirect_out = strdup(translatePath(strdup(single_param(out))));
   }
 }
 
