@@ -93,13 +93,14 @@ char * translatePath(char * c) {
   //printf("in translatePath \n");
 	char * newpath = (char *)malloc(sizeof(char) * (MAXLINE));
 
-  char *left = getenv("HOME");
-  //printf("left is %s\n", left);
+  newpath = strdup(getenv("HOME"));
+  //printf("left is %s\n", newpath);
 
 	char *right = c + 1;
   //printf("right is %s\n", right);
 	
-  newpath = strcat(left, right);
+  newpath = strcat(newpath, right);
+
   //c[strlen(left)] = rigth;
 	//printf("path is %s\n", newpath);
 	return newpath;    
@@ -156,17 +157,23 @@ void parser_single(char *c, int sz, commandT** cd, int bg)
   (*cd)->cmdline = strdup(c);
   tmp = c;
   for(i = 0; i < task_argc; i++){
-    (*cd) -> argv[i] = strdup(translatePath(strdup(single_param(tmp))));
+    char * newpath = translatePath(strdup(single_param(tmp)));
+    (*cd) -> argv[i] = strdup(newpath);
+    //free(newpath);
     while ((*tmp) != '\0') tmp++;
     tmp ++;
   }
   if(in){
     (*cd) -> is_redirect_in = 1;
-    (*cd) -> redirect_in = strdup(translatePath(strdup(single_param(in))));
+    char * newpath = translatePath(strdup(single_param(in)));
+    (*cd) -> redirect_in = strdup(newpath);
+    //free(newpath);
   }
   if(out){
     (*cd) -> is_redirect_out = 1;
-    (*cd) -> redirect_out = strdup(translatePath(strdup(single_param(out))));
+    char * newpath = translatePath(strdup(single_param(out)));
+    (*cd) -> redirect_out = strdup(newpath);
+    //free(newpath);
   }
 }
 
