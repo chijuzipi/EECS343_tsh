@@ -166,7 +166,7 @@ void RunCmdFork(commandT* cmd, bool fork)
   //printf("cmd is %s\n", cmd->argv[1]);
   commandT* newCmd;
   //if(strcmp(cmd -> argv[0], "unalias") == 0 ) {
-  if(strcmp(cmd -> argv[0], "unalias") == 0 || strcmp(cmd->argv[0], "alias")) {
+  if(strcmp(cmd -> argv[0], "unalias") == 0 || strcmp(cmd->argv[0], "alias") == 0) {
     newCmd = cmd;
   }
   else {
@@ -272,27 +272,28 @@ commandT* parseAliases(commandT* cmd) {
 
                 tmp[tmpLength] = 0;    
                 strcpy(newArg, tmp);
-                newCmd->argv[newArgCount] = strdup(newArg);
-
+		if(strcmp(newArg,"") != 0){
+                	newCmd->argv[newArgCount] = strdup(newArg);
                 newArgCount++;
 
                 tmp = realloc(tmp, sizeof(char) * MAXLINE);
                 tmpLength = 0;    
 
                 free(newArg);
+		}
             }         
             else {
-              printf("in else %c\n", currentChar);
+              //printf("in else %c\n", currentChar);
               if (currentChar == '~') {
-                printf("in translatePath \n");
+                //printf("in translatePath \n");
                 char * newpath = (char*)malloc(sizeof(char) * (MAXLINE));
                 char * right = new + 1;
                 newpath = strdup(right);
-                printf("rightis%s\n", newpath);
+                //printf("rightis%s\n", newpath);
                 tmp=strdup(getenv("HOME"));
-                printf("leftis%s\n",tmp);
+                //printf("leftis%s\n",tmp);
                 tmp=strcat(tmp,newpath);
-                printf("pathis%s\n",tmp);
+                //printf("pathis%s\n",tmp);
                 tmpLength=tmpLength+strlen(getenv("HOME"));
               }
               else{
