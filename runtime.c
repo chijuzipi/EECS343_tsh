@@ -186,9 +186,8 @@ void RunCmdFork(commandT* cmd, bool fork)
 
 void RunCmdPipe(commandT** cmd, int n)
 {
-    int i = 0;
-
     int pipefd[n - 1][2];
+    int i = 0;
 
     for (i = 0; i < n - 1; i++) {
       if (pipe(pipefd[i]) < 0) {
@@ -223,7 +222,8 @@ void RunCmdPipe(commandT** cmd, int n)
             close(pipefd[q][1]);
           }
 
-          RunCmdFork(cmd[i], FALSE);
+          execv(cmd[i]->argv[0], cmd[i]->argv);
+          //RunCmdFork(cmd[i], FALSE);
         }
         else if(pid < 0){
           perror("error");
@@ -603,33 +603,33 @@ static void Exec(commandT* cmd, bool forceFork)
   // block sigchld signals until recording the new process id,
   // and then fork the foreground process
   sigprocmask(SIG_BLOCK, &mask, NULL);
-  pid = fork();
+    pid = fork();
 
   /* This is run by the child. execute the command */
-  if (pid == 0) {
+    if (pid == 0) {
     //group the processs 
-    setpgid(0, 0);
-    //Usage : int execv(const char *path, char *const argv[]); 
-    execv(cmd->name, cmd->argv);
-  }
-
-  /* This is run by the parent. */
-  else {
-    //HandleJobs(child_pid);
-    if(cmd->bg){
-      addJobList(pid, cmd->cmdline, TRUE);
-      sigprocmask(SIG_UNBLOCK, &mask, NULL);
+      setpgid(0, 0);
+      //Usage : int execv(const char *path, char *const argv[]); 
+      execv(cmd->name, cmd->argv);
     }
+
+    /* This is run by the parent. */
     else {
-      fgpid = pid;
-      //FIXME the fg job also add to the list, with the "isbg" parameter set to FALSE
-      addJobList(pid, cmd->cmdline, FALSE);
+      //HandleJobs(child_pid);
+      if(cmd->bg){
+        addJobList(pid, cmd->cmdline, TRUE);
+        sigprocmask(SIG_UNBLOCK, &mask, NULL);
+      }
+      else {
+        fgpid = pid;
+        //FIXME the fg job also add to the list, with the "isbg" parameter set to FALSE
+        addJobList(pid, cmd->cmdline, FALSE);
 
-      sigprocmask(SIG_UNBLOCK, &mask, NULL);
+        sigprocmask(SIG_UNBLOCK, &mask, NULL);
 
-      waitfg(pid);
+        waitfg(pid);
+      }
     }
-  }
 }
 
 /* use a busy loop to wait fg */
