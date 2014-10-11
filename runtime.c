@@ -222,7 +222,7 @@ void RunCmdPipe(commandT** cmd, int n)
             close(pipefd[q][1]);
           }
 
-          execv(cmd[i]->argv[0], cmd[i]->argv);
+          execvp(cmd[i]->argv[0], cmd[i]->argv);
           //RunCmdFork(cmd[i], FALSE);
         }
         else if(pid < 0){
