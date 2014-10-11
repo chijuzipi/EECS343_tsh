@@ -551,15 +551,12 @@ void RunCmdRedirInOut(commandT* cmd, char* inFile, char* outFile)
   //port the file to out and input 
   dup2(fOutId, 1);
   dup2(fInId, 0);
-
   //run command
   RunCmdFork(cmd, TRUE);
-
   //restore the orignal standard input output
   dup2(origStdout, 1);
   dup2(origStdin, 0);
 
-  //close file
   close(origStdout);
   close(origStdin);
 }

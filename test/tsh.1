@@ -39,25 +39,13 @@ The project development was driven by the testcases and handout.
 In the ths.c the skelton already port the signal catcher, and we implement the
 "sig" function in response to the signals received. 
 
-For the basic test:
 In the runtime.c, it mainly deal with executing the command (fork, execv, and wait), and maintaining a linked list to
 store each jobs. We maintain a global variable fgpid to track the current fg process status. For the wait command, we did a sleep loop constatnly checking the status of the fgpid. Once the SIGHILD
 signal generated, the signal handler call the waitpid() function to check the new status of the process and update job
 linked list and fgpid. Before the shell process next command, the CheckJobs() function check the job list, 
 list any DONE processes before removing it.    
 
-For the extra credit:
-We implemented all three extra creadit work. 
-For the redirect IO part, we basically using dup() to store the original standard input and output port, and using dup2() to
-connect the standard input and output to the file.
-For the Alias part, we maintain an alias struct linklist, which store the alias mapping information. Unalias is just to
-remove the node from the list. when the command is in, the system first parse the command using parseAlias() function,
-to find the real command, and execute it as normal. 
-For the pipe part, we use similar concept when we implemented the redirect IO, which using dup2 to port input from
-specific file. And we use a new syste call pipe(),which takes a single argument, which is an
-array of two integers, and if successful, the array will contain two new file descriptors to be used for the pipeline.
-the implementation of the pipe is referenced from web-page: http://tldp.org/LDP/lpg/node11.html.
-
+We implemented Redirect IO and Alias toward extra credit. 
 
 .SH AUTHOR
 Yu Zhou,
