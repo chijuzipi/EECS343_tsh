@@ -165,7 +165,9 @@ void RunCmdFork(commandT* cmd, bool fork)
   //judge alias or not
   //printf("cmd is %s\n", cmd->argv[1]);
   commandT* newCmd;
-  if(strcmp(cmd -> argv[0], "unalias") == 0) {
+  if(strcmp(cmd -> argv[0], "unalias") == 0 ) {
+  //FIXME
+  //if(strcmp(cmd -> argv[0], "unalias") == 0 || strcmp(cmd->argv[0], "alias")) {
     newCmd = cmd;
   }
   else {
@@ -280,12 +282,32 @@ commandT* parseAliases(commandT* cmd) {
 
                 free(newArg);
             }         
-            else
-            {
-              tmp[tmpLength] = currentChar;
+            else {
+              tmp[tmpLength]=currentChar;
               tmpLength++;
             }
-        }
+          }
+            /*
+            {
+              printf("in else %c\n", currentChar);
+              if (currentChar == '~') {
+                printf("in translatePath \n");
+                char * newpath = (char*)malloc(sizeof(char) * (MAXLINE));
+                char * right = new + 1;
+                newpath = strdup(right);
+                printf("rightis%s\n", &newpath);
+                tmp=strdup(getenv("HOME"));
+                printf("leftis%s\n",&tmp);
+                tmp=strcat(tmp,newpath);
+                printf("pathis%s\n",&tmp);
+                tmpLength=tmpLength+strlen(getenv("HOME"));
+              }
+              else{
+                tmp[tmpLength]=currentChar;
+                tmpLength++;
+              }
+            }
+            */
         inputQuoted = FALSE;
         free(tmp);
         //free(currentArg); freeCommand will handle this after this func returns
@@ -299,6 +321,7 @@ commandT* parseAliases(commandT* cmd) {
     return newCmd;
     
 }
+
 void freeCommand(commandT* cmd)
 {
   int i;
@@ -328,7 +351,6 @@ char* aliasOf(char* nameStr) {
     }
     return result;
 }
-
 
 
 static void RunBuiltInCmd(commandT* cmd)
