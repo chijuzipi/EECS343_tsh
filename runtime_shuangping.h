@@ -53,27 +53,17 @@
 #define VAREXTERN(x, y) extern x;
 #endif
 
-pid_t fgpid;
-
-typedef enum {DONE, RUNNING, STOPPED} state_t;
-
 typedef struct command_t
 {
-  char* name; //always null
-  char *cmdline; //the whole command line input
-  char *redirect_in, *redirect_out; 
+  char* name;
+  char *cmdline;
+  char *redirect_in, *redirect_out;
   int is_redirect_in, is_redirect_out;
-  int bg; //use "&" at the end to make it 1
-  int argc; //the number of command section, "ls -l -a" === 3
-  char* argv[]; // each command section
+  int bg;
+  int argc;
+  char* argv[];
 } commandT;
 
-typedef struct aliasT_l
-{
-    char* lhs;
-    char* rhs;
-    struct aliasT_l* next;
-} aliasT;
 /************Global Variables*********************************************/
 
 /***********************************************************************
@@ -110,10 +100,21 @@ EXTERN void RunCmdBg(commandT*);
  *    Input: two command structure
  *    Output: void
  ***********************************************************************/
-EXTERN void RunCmdPipe(commandT**, int) ;
+//EXTERN void RunCmdPipe(commandT*, commandT*);
+EXTERN void RunCmdPipe(commandT**, int);
 
 /***********************************************************************
- *  Title: Runs two command with output redirection
+ *  Title: Runs a command with output & input redirection
+ * ---------------------------------------------------------------------
+ *    Purpose: Runs a command and redirects the output to a file and 
+ *    redirect input from a file.
+ *    Input: a command structure structure and a file name
+ *    Output: void
+ ***********************************************************************/
+EXTERN void RunCmdRedirInOut(commandT*, char*, char*);
+
+/***********************************************************************
+ *  Title: Runs a command with output redirection
  * ---------------------------------------------------------------------
  *    Purpose: Runs a command and redirects the output to a file.
  *    Input: a command structure structure and a file name
@@ -122,13 +123,23 @@ EXTERN void RunCmdPipe(commandT**, int) ;
 EXTERN void RunCmdRedirOut(commandT*, char*);
 
 /***********************************************************************
- *  Title: Runs two command with input redirection
+ *  Title: Runs a command with input redirection
  * ---------------------------------------------------------------------
  *    Purpose: Runs a command and redirects the input to a file.
  *    Input: a command structure structure and a file name
  *    Output: void
  ***********************************************************************/
 EXTERN void RunCmdRedirIn(commandT*, char*);
+
+/***********************************************************************
+ *  Title: Stop the foreground process
+ * ---------------------------------------------------------------------
+ *    Purpose: Stops the current foreground process if there is any.
+ *    Input: void
+ *    Output: void
+ ***********************************************************************/
+EXTERN void StopFgProc();
+EXTERN void SuspendFgProc();
 
 /***********************************************************************
  *  Title: Create a command structure 
@@ -175,32 +186,9 @@ EXTERN char* getLogin();
  ***********************************************************************/
 EXTERN void CheckJobs();
 
-/***********************************************************************
- *  Title: terminate fg 
- * ---------------------------------------------------------------------
- *    Purpose: handle signal INT.
- *    Input: void
- *    Output: void 
- ***********************************************************************/
-EXTERN void IntFg();
+EXTERN char* QueryAliasList(char*);
 
-/***********************************************************************
- *  Title: StopFg 
- * ---------------------------------------------------------------------
- *    Purpose: handle signal STOP.
- *    Input: void
- *    Output: void 
- ***********************************************************************/
-EXTERN void StopFg();
-
-/***********************************************************************
- *  Title: UpdateBgJob
- * ---------------------------------------------------------------------
- *    Purpose: handle signal STOP.
- *    Input: void
- *    Output: void 
- ***********************************************************************/
-EXTERN void UpdateBgJob(pid_t pid, state_t newstate);
+/************External Declaration*****************************************/
 
 /**************Definition***************************************************/
 
